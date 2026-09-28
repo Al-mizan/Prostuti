@@ -23,6 +23,7 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.batchInsert
 import java.util.UUID
 
 /**
@@ -74,24 +75,25 @@ class AdminService {
         if (rows.isEmpty()) return ImportSummary(imported = 0, rejected = emptyList())
 
         val creatorUuid = UUID.fromString(userId)
+        val now = Clock.System.now()
         dbQuery {
-            rows.forEach { values ->
-                QuestionsTable.insert {
-                    it[QuestionsTable.id] = UUID.randomUUID()
-                    it[QuestionsTable.type] = type
-                    it[QuestionsTable.examSession] = values["exam_session"] as String?
-                    it[QuestionsTable.subject] = values["subject"] as com.prostuti.core.model.Subject
-                    it[QuestionsTable.topic] = values["topic"] as String?
-                    it[QuestionsTable.questionText] = values["question_text"] as String
-                    it[QuestionsTable.optionA] = values["option_a"] as String
-                    it[QuestionsTable.optionB] = values["option_b"] as String
-                    it[QuestionsTable.optionC] = values["option_c"] as String
-                    it[QuestionsTable.optionD] = values["option_d"] as String
-                    it[QuestionsTable.correctOption] = values["correct_option"] as Option
-                    it[QuestionsTable.explanation] = values["explanation"] as String?
-                    it[QuestionsTable.difficulty] = values["difficulty"] as com.prostuti.core.model.Difficulty?
-                    it[QuestionsTable.createdBy] = creatorUuid
-                    it[QuestionsTable.createdAt] = Clock.System.now()
+            rows.chunked(250).forEach { batch ->
+                QuestionsTable.batchInsert(batch) { values ->
+                    this[QuestionsTable.id] = UUID.randomUUID()
+                    this[QuestionsTable.type] = type
+                    this[QuestionsTable.examSession] = values["exam_session"] as String?
+                    this[QuestionsTable.subject] = values["subject"] as com.prostuti.core.model.Subject
+                    this[QuestionsTable.topic] = values["topic"] as String?
+                    this[QuestionsTable.questionText] = values["question_text"] as String
+                    this[QuestionsTable.optionA] = values["option_a"] as String
+                    this[QuestionsTable.optionB] = values["option_b"] as String
+                    this[QuestionsTable.optionC] = values["option_c"] as String
+                    this[QuestionsTable.optionD] = values["option_d"] as String
+                    this[QuestionsTable.correctOption] = values["correct_option"] as Option
+                    this[QuestionsTable.explanation] = values["explanation"] as String?
+                    this[QuestionsTable.difficulty] = values["difficulty"] as com.prostuti.core.model.Difficulty?
+                    this[QuestionsTable.createdBy] = creatorUuid
+                    this[QuestionsTable.createdAt] = now
                 }
             }
         }

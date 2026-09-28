@@ -23,4 +23,5 @@ val appModule = module {
 
     single { AuthApi(client = get()) }
     single { com.prostuti.core.network.ProfileApi(client = get()) }
+    single { com.prostuti.core.network.QuestionBankApi(client = get()) }
 }

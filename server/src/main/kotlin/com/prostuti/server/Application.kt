@@ -29,12 +29,13 @@ fun main() {
         val authService = AuthService()
         val adminService = AdminService()
         val profileService = ProfileService()
+        val questionBankService = com.prostuti.server.services.QuestionBankService()
         routing {
             get("/health") {
                 call.respondText("OK", ContentType.Text.Plain, HttpStatusCode.OK)
             }
         }
-        apiRoutes(authService, adminService, profileService)
+        apiRoutes(authService, adminService, profileService, questionBankService)
     }.start(wait = true)
 }
 
