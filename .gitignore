@@ -1,0 +1,15 @@
+*.iml
+.gradle/
+build/
+local.properties
+.DS_Store
+captures/
+.externalNativeBuild/
+.cxx/
+.env
+antigravity_prompts.md
+.puku
+.scratch/
+.venv/
+.artifacts/
+.idea/
