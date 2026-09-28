@@ -40,6 +40,7 @@ object Routes {
     const val Register = "auth/register"
     const val Main = "main"
     const val Admin = "admin"
+    const val Exam = "exam"
 }
 
 @Composable
@@ -97,12 +98,23 @@ fun ProstutiNavGraph() {
                 onNavigateToAdmin = {
                     navController.navigate(Routes.Admin)
                 },
+                onNavigateToExam = {
+                    navController.navigate(Routes.Exam)
+                },
             )
         }
 
         composable(Routes.Admin) {
             AdminPlaceholderScreen(
                 onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.Exam) {
+            val viewModel: com.prostuti.feature.exam.presentation.ExamViewModel = koinViewModel()
+            com.prostuti.feature.exam.ui.ExamScreen(
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

@@ -20,6 +20,7 @@ fun Application.apiRoutes(
     profileService: ProfileService,
     questionBankService: com.prostuti.server.services.QuestionBankService,
     practiceService: com.prostuti.server.services.PracticeService,
+    examService: com.prostuti.server.services.ExamService,
 ) {
     routing {
         route("/api/v1") {
@@ -29,7 +30,7 @@ fun Application.apiRoutes(
             adminRoutes(adminService)
             questionBankRoutes(questionBankService)
             practiceRoutes(practiceService)
-            // examRoutes(...), etc. land here in later segments.
+            examRoutes(examService)
         }
     }
 }

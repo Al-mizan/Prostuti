@@ -71,6 +71,9 @@ object DatabaseFactory {
                 ExamAttemptQuestionsTable,
                 AnswersTable
             )
+            runCatching {
+                exec("ALTER TABLE exam_attempts ALTER COLUMN finished_at DROP NOT NULL, ALTER COLUMN time_taken_seconds DROP NOT NULL, ALTER COLUMN score DROP NOT NULL;")
+            }
         }
     }
 

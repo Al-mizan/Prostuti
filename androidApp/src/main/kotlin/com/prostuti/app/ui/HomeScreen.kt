@@ -60,6 +60,7 @@ fun HomeScreen(
     profileViewModel: ProfileViewModel,
     onNavigateToPractice: () -> Unit,
     onNavigateToQuestionBank: () -> Unit,
+    onNavigateToExam: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateToAdmin: () -> Unit,
     modifier: Modifier = Modifier,
@@ -363,7 +364,7 @@ fun HomeScreen(
             icon = Icons.Default.Timer,
             iconColor = Color(0xFF2563EB),
             iconBgColor = Color(0xFFDBEAFE),
-            onClick = onNavigateToQuestionBank,
+            onClick = onNavigateToExam,
         )
 
         // Admin Card (Visible to Role.ADMIN)
