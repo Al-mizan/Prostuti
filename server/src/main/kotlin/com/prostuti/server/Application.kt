@@ -32,12 +32,13 @@ fun main() {
         val questionBankService = com.prostuti.server.services.QuestionBankService()
         val practiceService = com.prostuti.server.services.PracticeService()
         val examService = com.prostuti.server.services.ExamService()
+        val historyService = com.prostuti.server.services.HistoryService()
         routing {
             get("/health") {
                 call.respondText("OK", ContentType.Text.Plain, HttpStatusCode.OK)
             }
         }
-        apiRoutes(authService, adminService, profileService, questionBankService, practiceService, examService)
+        apiRoutes(authService, adminService, profileService, questionBankService, practiceService, examService, historyService)
     }.start(wait = true)
 }
 

@@ -21,6 +21,7 @@ fun Application.apiRoutes(
     questionBankService: com.prostuti.server.services.QuestionBankService,
     practiceService: com.prostuti.server.services.PracticeService,
     examService: com.prostuti.server.services.ExamService,
+    historyService: com.prostuti.server.services.HistoryService,
 ) {
     routing {
         route("/api/v1") {
@@ -31,6 +32,7 @@ fun Application.apiRoutes(
             questionBankRoutes(questionBankService)
             practiceRoutes(practiceService)
             examRoutes(examService)
+            historyRoutes(historyService)
         }
     }
 }

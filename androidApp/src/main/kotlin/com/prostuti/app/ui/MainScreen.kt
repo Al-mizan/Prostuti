@@ -50,6 +50,7 @@ fun MainScreen(
     onLoggedOut: () -> Unit,
     onNavigateToAdmin: () -> Unit,
     onNavigateToExam: () -> Unit,
+    onNavigateToHistory: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
@@ -93,6 +94,7 @@ fun MainScreen(
                     onNavigateToPractice = { selectedTabIndex = 1 },
                     onNavigateToQuestionBank = { selectedTabIndex = 2 },
                     onNavigateToExam = onNavigateToExam,
+                    onNavigateToHistory = onNavigateToHistory,
                     onNavigateToProfile = { selectedTabIndex = 3 },
                     onNavigateToAdmin = onNavigateToAdmin,
                 )
@@ -101,6 +103,7 @@ fun MainScreen(
                 3 -> ProfileScreen(
                     viewModel = profileViewModel,
                     onLoggedOut = onLoggedOut,
+                    onNavigateToHistory = onNavigateToHistory,
                 )
             }
         }

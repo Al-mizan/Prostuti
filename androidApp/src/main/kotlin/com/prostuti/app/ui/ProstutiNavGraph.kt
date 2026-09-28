@@ -41,6 +41,7 @@ object Routes {
     const val Main = "main"
     const val Admin = "admin"
     const val Exam = "exam"
+    const val History = "history"
 }
 
 @Composable
@@ -101,6 +102,9 @@ fun ProstutiNavGraph() {
                 onNavigateToExam = {
                     navController.navigate(Routes.Exam)
                 },
+                onNavigateToHistory = {
+                    navController.navigate(Routes.History)
+                },
             )
         }
 
@@ -113,6 +117,14 @@ fun ProstutiNavGraph() {
         composable(Routes.Exam) {
             val viewModel: com.prostuti.feature.exam.presentation.ExamViewModel = koinViewModel()
             com.prostuti.feature.exam.ui.ExamScreen(
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Routes.History) {
+            val viewModel: com.prostuti.feature.history.presentation.HistoryViewModel = koinViewModel()
+            com.prostuti.feature.history.ui.HistoryScreen(
                 viewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
             )

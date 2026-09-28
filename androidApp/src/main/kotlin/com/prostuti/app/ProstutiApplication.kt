@@ -4,6 +4,7 @@ import android.app.Application
 import com.prostuti.app.di.appModule
 import com.prostuti.feature.auth.di.authModule
 import com.prostuti.feature.exam.di.examModule
+import com.prostuti.feature.history.di.historyModule
 import com.prostuti.feature.practice.di.practiceModule
 import com.prostuti.feature.profile.di.profileModule
 import com.prostuti.feature.questionbank.di.questionBankModule
@@ -18,7 +19,7 @@ class ProstutiApplication : Application() {
         startKoin {
             androidLogger(Level.INFO)
             androidContext(this@ProstutiApplication)
-            modules(appModule, authModule, profileModule, questionBankModule, practiceModule, examModule)
+            modules(appModule, authModule, profileModule, questionBankModule, practiceModule, examModule, historyModule)
         }
     }
 }

@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Timer
@@ -61,6 +62,7 @@ fun HomeScreen(
     onNavigateToPractice: () -> Unit,
     onNavigateToQuestionBank: () -> Unit,
     onNavigateToExam: () -> Unit,
+    onNavigateToHistory: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateToAdmin: () -> Unit,
     modifier: Modifier = Modifier,
@@ -365,6 +367,19 @@ fun HomeScreen(
             iconColor = Color(0xFF2563EB),
             iconBgColor = Color(0xFFDBEAFE),
             onClick = onNavigateToExam,
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        // History & Wrong Answers Card
+        DashboardActionCard(
+            title = "পরীক্ষার ইতিহাস ও ভুল উত্তর",
+            subtitle = "বিগত সব প্রচেষ্টার ফলাফল এবং ভুল উত্তরসমূহ রিভিশন ডেক",
+            badgeText = "History",
+            icon = Icons.Default.History,
+            iconColor = Color(0xFF7C3AED),
+            iconBgColor = Color(0xFFEDE9FE),
+            onClick = onNavigateToHistory,
         )
 
         // Admin Card (Visible to Role.ADMIN)

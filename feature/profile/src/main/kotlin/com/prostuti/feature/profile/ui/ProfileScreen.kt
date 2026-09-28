@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
@@ -72,6 +73,7 @@ import com.prostuti.feature.profile.presentation.ProfileViewModel
 fun ProfileScreen(
     viewModel: ProfileViewModel,
     onLoggedOut: () -> Unit,
+    onNavigateToHistory: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -345,6 +347,12 @@ fun ProfileScreen(
                     // Profile Actions Card
                     ProstutiCard {
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            ProfileActionItem(
+                                icon = Icons.Default.History,
+                                title = "পরীক্ষার ইতিহাস ও ভুল উত্তর",
+                                subtitle = "বিগত প্রচেষ্টা এবং ভুল উত্তরসমূহ পর্যালোচনা করুন",
+                                onClick = onNavigateToHistory,
+                            )
                             ProfileActionItem(
                                 icon = Icons.Default.Face,
                                 title = "ম্যাসকট পরিবর্তন করুন",
