@@ -25,6 +25,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.prostuti.core.common.SessionStore
+import com.prostuti.feature.practice.presentation.PracticeViewModel
+import com.prostuti.feature.practice.ui.PracticeScreen
 import com.prostuti.feature.profile.presentation.ProfileViewModel
 import com.prostuti.feature.profile.ui.ProfileScreen
 import com.prostuti.feature.questionbank.presentation.QuestionBankViewModel
@@ -52,6 +54,7 @@ fun MainScreen(
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
     val profileViewModel: ProfileViewModel = koinViewModel()
     val questionBankViewModel: QuestionBankViewModel = koinViewModel()
+    val practiceViewModel: PracticeViewModel = koinViewModel()
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -91,7 +94,7 @@ fun MainScreen(
                     onNavigateToProfile = { selectedTabIndex = 3 },
                     onNavigateToAdmin = onNavigateToAdmin,
                 )
-                1 -> PracticeScreen()
+                1 -> PracticeScreen(viewModel = practiceViewModel)
                 2 -> QuestionBankScreen(viewModel = questionBankViewModel)
                 3 -> ProfileScreen(
                     viewModel = profileViewModel,
