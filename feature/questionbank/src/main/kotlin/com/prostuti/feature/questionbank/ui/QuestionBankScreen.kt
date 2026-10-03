@@ -46,14 +46,17 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import com.prostuti.feature.questionbank.presentation.QuestionBankView
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,10 +68,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.prostuti.core.designsystem.ProstutiBadge
 import com.prostuti.core.designsystem.ProstutiButton
+import com.prostuti.core.designsystem.SubjectGridSkeleton
 import com.prostuti.core.model.Option
 import com.prostuti.core.model.QuestionBankItemDto
 import com.prostuti.core.model.Subject
@@ -84,6 +89,7 @@ private val LightCrimsonBg = Color(0xFFFFEBEE)
 @Composable
 fun QuestionBankScreen(
     viewModel: QuestionBankViewModel,
+    onStartExam: (sessionName: String?) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -94,21 +100,28 @@ fun QuestionBankScreen(
     ) {
         when (val state = uiState) {
             is QuestionBankUiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 16.dp),
                 ) {
                     Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
                     ) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         Text(
-                            text = "প্রশ্ন ব্যাংক লোড হচ্ছে...",
+                            text = "প্রশ্ন ব্যাংক",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onBackground,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = "বিষয়ভিত্তিক প্রশ্ন ও বিগত বছরের বিসিএস সমাধান",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
+                    SubjectGridSkeleton(itemCount = 6)
                 }
             }
 
@@ -143,12 +156,135 @@ fun QuestionBankScreen(
             }
 
             is QuestionBankUiState.Success -> {
-                QuestionBankContent(
-                    state = state,
-                    onEvent = viewModel::onEvent,
-                )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    when (state.view) {
+                        QuestionBankView.HOME -> {
+                            QuestionBankHomeScreen(
+                                onJoinLiveExam = { onStartExam(null) },
+                                onOpenBcsSessions = {
+                                    viewModel.onEvent(QuestionBankUiEvent.NavigateView(QuestionBankView.BCS_SESSIONS))
+                                },
+                                onOpenSubject = { subject ->
+                                    viewModel.onEvent(QuestionBankUiEvent.OpenSubjectStudy(subject))
+                                },
+                            )
+                        }
+
+                        QuestionBankView.BCS_SESSIONS -> {
+                            BcsSessionsScreen(
+                                sessions = state.filteredSessions,
+                                searchQuery = state.searchQuery,
+                                onSearchQueryChange = {
+                                    viewModel.onEvent(QuestionBankUiEvent.UpdateSearchQuery(it))
+                                },
+                                onSessionClick = { session ->
+                                    viewModel.onEvent(QuestionBankUiEvent.OpenSessionModal(session))
+                                },
+                                onBack = {
+                                    viewModel.onEvent(QuestionBankUiEvent.NavigateView(QuestionBankView.HOME))
+                                },
+                            )
+                        }
+
+                        QuestionBankView.STUDY -> {
+                            QuestionBankContent(
+                                state = state,
+                                onEvent = viewModel::onEvent,
+                                onBack = {
+                                    viewModel.onEvent(QuestionBankUiEvent.NavigateView(QuestionBankView.HOME))
+                                },
+                            )
+                        }
+                    }
+
+                    // Chorcha-style Exam Action Modal
+                    if (state.activeModalSession != null) {
+                        BcsExamActionModal(
+                            session = state.activeModalSession,
+                            onDismiss = { viewModel.onEvent(QuestionBankUiEvent.CloseSessionModal) },
+                            onStartExam = { sessionName ->
+                                onStartExam(sessionName)
+                            },
+                            onViewQuestions = { session ->
+                                viewModel.viewQuestionsForSession(session)
+                            },
+                        )
+                    }
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun QuestionBankHomeScreen(
+    onJoinLiveExam: () -> Unit,
+    onOpenBcsSessions: () -> Unit,
+    onOpenSubject: (Subject) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+        // App / Section Title
+        Column {
+            Text(
+                text = "বিসিএস প্রশ্ন ব্যাংক",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = "বিষয়ভিত্তিক প্রশ্ন, লাইভ মডেল টেস্ট ও বিগত বছরের বিসিএস সমাধান",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+
+        // 1. Live Model Test Banner
+        LiveModelTestBannerCard(onJoinExam = onJoinLiveExam)
+
+        // 2. Institute BCS Preliminary Archive Card
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(
+                text = "প্রতিষ্ঠান ভিত্তিক প্রশ্ন ব্যাংক",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
+            )
+            InstituteBcsCard(onClick = onOpenBcsSessions)
+        }
+
+        // 3. Subject-wise Grid (9 BCS Subjects)
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "বিষয় ভিত্তিক প্রশ্ন ব্যাংক",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Text(
+                    text = "৯টি বিষয়",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+
+            SubjectCardsGrid(onSubjectClick = onOpenSubject)
+        }
+
+        Spacer(Modifier.height(16.dp))
     }
 }
 
@@ -156,6 +292,7 @@ fun QuestionBankScreen(
 private fun QuestionBankContent(
     state: QuestionBankUiState.Success,
     onEvent: (QuestionBankUiEvent) -> Unit,
+    onBack: () -> Unit,
 ) {
     val listState = rememberLazyListState()
 
@@ -172,26 +309,40 @@ private fun QuestionBankContent(
                 .background(MaterialTheme.colorScheme.surface)
                 .padding(top = 16.dp, bottom = 8.dp),
         ) {
-            // Screen Title
+            // Screen Title with Back Button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
+                    .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Column {
-                    Text(
-                        text = "বিসিএস প্রশ্ন ব্যাংক",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        text = "১০ম থেকে ৪৭তম বিসিএস প্রিলিমিনারি",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.weight(1f),
+                ) {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = state.selectedSubject?.toBanglaName() ?: state.selectedSession.ifBlank { "বিসিএস প্রশ্ন ব্যাংক" },
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = "প্রশ্নোত্তর ও বিশদ ব্যাখ্যা",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
 
                 // Session Selector Button with Dropdown

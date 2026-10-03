@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -575,6 +576,7 @@ private fun ActiveExamContent(
                         onClick = onPrevious,
                         enabled = state.hasPrevious,
                         shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.defaultMinSize(minHeight = 48.dp),
                     ) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
@@ -582,7 +584,10 @@ private fun ActiveExamContent(
                     }
 
                     if (selectedOption != null) {
-                        TextButton(onClick = onClearOption) {
+                        TextButton(
+                            onClick = onClearOption,
+                            modifier = Modifier.defaultMinSize(minHeight = 48.dp),
+                        ) {
                             Text("উত্তর বাতিল", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelMedium)
                         }
                     }
@@ -591,6 +596,7 @@ private fun ActiveExamContent(
                         onClick = onNext,
                         enabled = state.hasNext,
                         shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.defaultMinSize(minHeight = 48.dp),
                     ) {
                         Text("পরবর্তী")
                         Spacer(Modifier.width(6.dp))

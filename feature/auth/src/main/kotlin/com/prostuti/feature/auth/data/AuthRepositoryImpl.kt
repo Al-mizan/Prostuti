@@ -26,6 +26,9 @@ class AuthRepositoryImpl(
     override suspend fun login(email: String, password: String): Result<AuthResponse> =
         runAuthCall { api.login(email, password) }
 
+    override suspend fun loginWithGoogle(idToken: String): Result<AuthResponse> =
+        runAuthCall { api.loginWithGoogle(idToken) }
+
     override suspend fun me(): Result<MeResponse> = try {
         Result.Success(api.me())
     } catch (e: ClientRequestException) {

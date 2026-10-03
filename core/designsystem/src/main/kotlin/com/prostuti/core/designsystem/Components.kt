@@ -111,6 +111,62 @@ fun ProstutiLogo(modifier: Modifier = Modifier) {
 }
 
 /**
+ * Clean vector rendering of the Google 4-color 'G' icon.
+ */
+@Composable
+fun GoogleLogo(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.size(20.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
+            val stroke = size.width * 0.18f
+            val center = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height / 2f)
+
+            // Red arc (top)
+            drawArc(
+                color = Color(0xFFEA4335),
+                startAngle = 180f,
+                sweepAngle = 100f,
+                useCenter = false,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke, cap = StrokeCap.Round)
+            )
+            // Yellow arc (bottom-left)
+            drawArc(
+                color = Color(0xFFFBBC05),
+                startAngle = 120f,
+                sweepAngle = 60f,
+                useCenter = false,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke)
+            )
+            // Green arc (bottom)
+            drawArc(
+                color = Color(0xFF34A853),
+                startAngle = 20f,
+                sweepAngle = 100f,
+                useCenter = false,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke, cap = StrokeCap.Round)
+            )
+            // Blue arc & crossbar
+            drawArc(
+                color = Color(0xFF4285F4),
+                startAngle = 315f,
+                sweepAngle = 65f,
+                useCenter = false,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke)
+            )
+            drawLine(
+                color = Color(0xFF4285F4),
+                start = center,
+                end = androidx.compose.ui.geometry.Offset(size.width - (stroke / 4f), center.y),
+                strokeWidth = stroke,
+                cap = StrokeCap.Square
+            )
+        }
+    }
+}
+
+/**
  * Elevated, bordered Card component.
  */
 @Composable

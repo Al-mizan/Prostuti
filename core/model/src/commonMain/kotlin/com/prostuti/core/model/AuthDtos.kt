@@ -23,6 +23,11 @@ data class LoginRequest(
 )
 
 @Serializable
+data class GoogleAuthRequest(
+    val idToken: String,
+)
+
+@Serializable
 data class BootstrapAdminRequest(
     val name: String,
     val email: String,

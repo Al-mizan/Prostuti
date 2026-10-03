@@ -99,7 +99,10 @@ fun MainScreen(
                     onNavigateToAdmin = onNavigateToAdmin,
                 )
                 1 -> PracticeScreen(viewModel = practiceViewModel)
-                2 -> QuestionBankScreen(viewModel = questionBankViewModel)
+                2 -> QuestionBankScreen(
+                    viewModel = questionBankViewModel,
+                    onStartExam = { sessionName -> onNavigateToExam() },
+                )
                 3 -> ProfileScreen(
                     viewModel = profileViewModel,
                     onLoggedOut = onLoggedOut,

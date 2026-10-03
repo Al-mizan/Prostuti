@@ -74,4 +74,22 @@ class QuestionBankUseCasesTest {
         assertEquals("q-1", page.items.first().id)
         assertEquals(Option.D, page.items.first().correctOption)
     }
+
+    @Test
+    fun `BcsSessionSummaryDto retains accurate duration, marks, and negative marking defaults`() {
+        val dto = BcsSessionSummaryDto(
+            sessionName = "45th BCS Preliminary",
+            totalQuestions = 200,
+        )
+        assertEquals(120, dto.durationMinutes)
+        assertEquals(200.0, dto.totalMarks, 0.001)
+        assertEquals(0.5, dto.negativeMarkingPerQuestion, 0.001)
+    }
+
+    @Test
+    fun `BcsSubjectCards has exactly 9 subjects corresponding to Subject enum`() {
+        val mappedSubjects = com.prostuti.feature.questionbank.ui.BcsSubjectCards.map { it.subject }.toSet()
+        assertEquals(9, com.prostuti.feature.questionbank.ui.BcsSubjectCards.size)
+        assertEquals(Subject.entries.toSet(), mappedSubjects)
+    }
 }

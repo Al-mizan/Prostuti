@@ -22,23 +22,57 @@ class QuestionBankService {
      */
     suspend fun listSessions(): List<BcsSessionSummaryDto> = dbQuery {
         val countColumn = QuestionsTable.id.count()
-        QuestionsTable
+        val dbCounts = QuestionsTable
             .select(QuestionsTable.examSession, countColumn)
             .where {
                 (QuestionsTable.type eq QuestionType.BANK) and QuestionsTable.examSession.isNotNull()
             }
             .groupBy(QuestionsTable.examSession)
-            .mapNotNull { row ->
-                val session = row[QuestionsTable.examSession] ?: return@mapNotNull null
-                val count = row[countColumn].toInt()
-                BcsSessionSummaryDto(sessionName = session, totalQuestions = count)
+            .associate { row ->
+                val session = row[QuestionsTable.examSession] ?: ""
+                session to row[countColumn].toInt()
             }
-            .sortedWith(
-                compareByDescending<BcsSessionSummaryDto> { dto ->
-                    // Extract number from e.g. "47th BCS Preliminary" -> 47
-                    Regex("""\d+""").find(dto.sessionName)?.value?.toIntOrNull() ?: 0
-                }.thenByDescending { it.sessionName }
+
+        val defaultArchive = (50 downTo 10).map { edition ->
+            val isShort = edition in setOf(49, 42, 33) || edition <= 34
+            val sessionName = when (edition) {
+                49 -> "49th BCS(General) Preli"
+                48 -> "48th BCS(Special) Preli"
+                else -> "${edition}th BCS Preli"
+            }
+            val defaultCount = if (edition == 37) 198 else if (isShort) 100 else 200
+            val duration = if (isShort) 60 else 120
+            val marks = if (isShort) 100.0 else 200.0
+
+            val count = dbCounts.entries.firstOrNull { it.key.contains("${edition}th") || it.key == sessionName }?.value
+                ?: defaultCount
+
+            BcsSessionSummaryDto(
+                sessionName = sessionName,
+                totalQuestions = count,
+                durationMinutes = duration,
+                totalMarks = marks,
+                negativeMarkingPerQuestion = 0.5,
             )
+        }
+
+        val customDbSessions = dbCounts.filterKeys { dbName ->
+            defaultArchive.none { it.sessionName == dbName || dbName.contains(Regex("""\b\d+th\b""")) }
+        }.map { (name, count) ->
+            BcsSessionSummaryDto(
+                sessionName = name,
+                totalQuestions = count,
+                durationMinutes = 120,
+                totalMarks = 200.0,
+                negativeMarkingPerQuestion = 0.5,
+            )
+        }
+
+        (customDbSessions + defaultArchive).sortedWith(
+            compareByDescending<BcsSessionSummaryDto> { dto ->
+                Regex("""\d+""").find(dto.sessionName)?.value?.toIntOrNull() ?: 0
+            }.thenByDescending { it.sessionName }
+        )
     }
 
     /**

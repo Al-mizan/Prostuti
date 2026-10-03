@@ -33,6 +33,8 @@ dependencies {
     implementation(libs.dotenv.kotlin)
 
     implementation(libs.bcrypt)
+    implementation(libs.google.api.client)
+    implementation(libs.google.http.client.gson)
 
     // CSV parsing (Apache Commons CSV — per SKILL.md §6, never manual split)
     implementation(libs.commons.csv)

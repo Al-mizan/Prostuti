@@ -75,6 +75,7 @@ fun ProstutiNavGraph() {
                 viewModel = viewModel,
                 onAuthenticated = { goAfterLogin(navController) },
                 onSwitchMode = { navController.navigate(Routes.Register) },
+                serverClientId = com.prostuti.app.BuildConfig.WEB_GOOGLE_CLIENT_ID,
             )
         }
 
@@ -85,6 +86,7 @@ fun ProstutiNavGraph() {
                 viewModel = viewModel,
                 onAuthenticated = { goAfterLogin(navController) },
                 onSwitchMode = { navController.popBackStack() },
+                serverClientId = com.prostuti.app.BuildConfig.WEB_GOOGLE_CLIENT_ID,
             )
         }
 
@@ -109,8 +111,10 @@ fun ProstutiNavGraph() {
         }
 
         composable(Routes.Admin) {
-            AdminPlaceholderScreen(
-                onBack = { navController.popBackStack() }
+            val viewModel: com.prostuti.feature.admin.presentation.AdminViewModel = koinViewModel()
+            com.prostuti.feature.admin.ui.AdminScreen(
+                viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() },
             )
         }
 
@@ -135,54 +139,5 @@ fun ProstutiNavGraph() {
 private fun goAfterLogin(navController: NavHostController) {
     navController.navigate(Routes.Main) {
         popUpTo(Routes.Login) { inclusive = true }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun AdminPlaceholderScreen(onBack: () -> Unit) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("অ্যাডমিন প্যানেল", fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "পেছনে")
-                    }
-                }
-            )
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            ProstutiBadge(
-                text = "ROLE.ADMIN REQUIRED",
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer,
-            )
-            Spacer(Modifier.height(16.dp))
-            Text(
-                text = "অ্যাডমিন পোর্টাল",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "CSV ইমপোর্ট এবং প্রশ্ন ব্যবস্থাপনা ফিচারটি পরবর্তী ধাপে সংযুক্ত করা হবে।",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(24.dp))
-            ProstutiButton(
-                text = "হোমে ফিরে যান",
-                onClick = onBack,
-            )
-        }
     }
 }

@@ -1,6 +1,7 @@
 package com.prostuti.server.routes
 
 import com.prostuti.core.model.BootstrapAdminRequest
+import com.prostuti.core.model.GoogleAuthRequest
 import com.prostuti.core.model.LoginRequest
 import com.prostuti.core.model.RegisterRequest
 import com.prostuti.server.auth.AuthService
@@ -23,6 +24,11 @@ fun Route.authRoutes(authService: AuthService) {
         post("/login") {
             val req = call.receive<LoginRequest>()
             val res = authService.login(req.email, req.password)
+            call.respond(HttpStatusCode.OK, res)
+        }
+        post("/google") {
+            val req = call.receive<GoogleAuthRequest>()
+            val res = authService.loginWithGoogle(req.idToken)
             call.respond(HttpStatusCode.OK, res)
         }
         post("/bootstrap-admin") {

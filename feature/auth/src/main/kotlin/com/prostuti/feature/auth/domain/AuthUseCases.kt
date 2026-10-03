@@ -23,3 +23,8 @@ class RegisterUseCase(private val repo: AuthRepository) {
 class GetCurrentUserUseCase(private val repo: AuthRepository) {
     suspend operator fun invoke(): Result<MeResponse> = repo.me()
 }
+
+class LoginWithGoogleUseCase(private val repo: AuthRepository) {
+    suspend operator fun invoke(idToken: String): Result<AuthResponse> =
+        repo.loginWithGoogle(idToken)
+}

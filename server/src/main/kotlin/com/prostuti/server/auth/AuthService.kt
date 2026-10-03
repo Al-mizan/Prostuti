@@ -8,6 +8,7 @@ import com.prostuti.server.db.tables.UsersTable
 import kotlinx.datetime.Clock
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
 import java.util.UUID
@@ -90,6 +91,7 @@ class AuthService {
                 ?: throw IllegalArgumentException("Invalid credentials")
 
             val hash = row[UsersTable.passwordHash]
+                ?: throw IllegalArgumentException("This account uses Google Sign-In. Please sign in with Google.")
             require(verifyPassword(password, hash)) { "Invalid credentials" }
 
             val userId = row[UsersTable.id].toString()
@@ -99,6 +101,59 @@ class AuthService {
                 userId = userId,
                 role = role,
             )
+        }
+    }
+
+    suspend fun loginWithGoogle(
+        idToken: String,
+        verifier: GoogleTokenVerifier = GoogleAuthVerifier()
+    ): AuthResponse {
+        val googleUser = verifier.verify(idToken)
+            ?: throw IllegalArgumentException("Invalid Google token")
+
+        val normalizedEmail = googleUser.email.trim().lowercase()
+
+        return dbQuery {
+            val existing = UsersTable
+                .selectAll()
+                .where { (UsersTable.googleId eq googleUser.googleId) or (UsersTable.email eq normalizedEmail) }
+                .limit(1)
+                .firstOrNull()
+
+            if (existing != null) {
+                val userId = existing[UsersTable.id].toString()
+                val role = existing[UsersTable.role]
+
+                if (existing[UsersTable.googleId] == null) {
+                    UsersTable.update({ UsersTable.id eq existing[UsersTable.id] }) {
+                        it[googleId] = googleUser.googleId
+                    }
+                }
+
+                AuthResponse(
+                    token = JwtConfig.makeToken(userId, role.name),
+                    userId = userId,
+                    role = role,
+                )
+            } else {
+                val userId = UUID.randomUUID()
+                UsersTable.insert {
+                    it[id] = userId
+                    it[name] = googleUser.name
+                    it[email] = normalizedEmail
+                    it[passwordHash] = null
+                    it[googleId] = googleUser.googleId
+                    it[role] = Role.STUDENT
+                    it[avatarId] = "mascot_1"
+                    it[createdAt] = Clock.System.now()
+                }
+
+                AuthResponse(
+                    token = JwtConfig.makeToken(userId.toString(), Role.STUDENT.name),
+                    userId = userId.toString(),
+                    role = Role.STUDENT,
+                )
+            }
         }
     }
 

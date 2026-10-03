@@ -4,6 +4,7 @@ import com.prostuti.feature.auth.data.AuthRepositoryImpl
 import com.prostuti.feature.auth.domain.AuthRepository
 import com.prostuti.feature.auth.domain.GetCurrentUserUseCase
 import com.prostuti.feature.auth.domain.LoginUseCase
+import com.prostuti.feature.auth.domain.LoginWithGoogleUseCase
 import com.prostuti.feature.auth.domain.RegisterUseCase
 import com.prostuti.feature.auth.presentation.AuthUiState
 import com.prostuti.feature.auth.presentation.AuthViewModel
@@ -19,10 +20,11 @@ val authModule = module {
     single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
     factory { LoginUseCase(get()) }
     factory { RegisterUseCase(get()) }
+    factory { LoginWithGoogleUseCase(get()) }
     factory { GetCurrentUserUseCase(get()) }
 
     // One VM per mode — the screen passes the mode via Koin's `parametersOf`.
     viewModel { (mode: AuthUiState.Mode) ->
-        AuthViewModel(mode, get(), get())
+        AuthViewModel(mode, get(), get(), get())
     }
 }

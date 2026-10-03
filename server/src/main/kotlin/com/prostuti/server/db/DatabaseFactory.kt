@@ -74,6 +74,10 @@ object DatabaseFactory {
             runCatching {
                 exec("ALTER TABLE exam_attempts ALTER COLUMN finished_at DROP NOT NULL, ALTER COLUMN time_taken_seconds DROP NOT NULL, ALTER COLUMN score DROP NOT NULL;")
             }
+            runCatching {
+                exec("ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;")
+                exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id TEXT;")
+            }
         }
     }
 

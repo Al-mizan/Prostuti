@@ -1,0 +1,61 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "1. Run Ktor Server",
+      "type": "shell",
+      "command": "./gradlew :server:run",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "group": "server"
+      }
+    },
+    {
+      "label": "2. ADB Reverse Port (5000)",
+      "type": "shell",
+      "command": "adb reverse tcp:5000 tcp:5000 && adb reverse --list",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "3. Install & Launch Android App",
+      "type": "shell",
+      "command": "./gradlew :androidApp:installDebug -PPROSTUTI_API_BASE_URL=http://localhost:5000 && adb shell am start -n com.prostuti.app/.MainActivity",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Run Full App (Bridge + Install + Launch)",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "2. ADB Reverse Port (5000)",
+        "3. Install & Launch Android App"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "View Android Logs (Logcat)",
+      "type": "shell",
+      "command": "adb logcat -v color -s Prostuti com.prostuti.app",
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    }
+  ]
+}

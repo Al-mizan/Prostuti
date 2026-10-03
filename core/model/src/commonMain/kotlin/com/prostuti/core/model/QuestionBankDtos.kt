@@ -10,6 +10,9 @@ import kotlinx.serialization.Serializable
 data class BcsSessionSummaryDto(
     val sessionName: String,
     val totalQuestions: Int,
+    val durationMinutes: Int = 120,
+    val totalMarks: Double = 200.0,
+    val negativeMarkingPerQuestion: Double = 0.5,
 )
 
 /**

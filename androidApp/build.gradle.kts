@@ -19,6 +19,11 @@ android {
         val devBaseUrl = (project.findProperty("PROSTUTI_API_BASE_URL") as String?)
             ?: "http://10.0.2.2:5000"
         buildConfigField("String", "API_BASE_URL", "\"$devBaseUrl\"")
+
+        val webGoogleClientId = (project.findProperty("WEB_GOOGLE_CLIENT_ID") as String?)
+            ?: System.getenv("WEB_GOOGLE_CLIENT_ID")
+            ?: "746885731832-ccsjstr7t6tiu8esaujlut4g0msfid25.apps.googleusercontent.com"
+        buildConfigField("String", "WEB_GOOGLE_CLIENT_ID", "\"$webGoogleClientId\"")
     }
 
     buildTypes {
@@ -78,6 +83,12 @@ dependencies {
     // Koin
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
+
+    // Google Auth (Credential Manager)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.google.identity.googleid)
+
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)

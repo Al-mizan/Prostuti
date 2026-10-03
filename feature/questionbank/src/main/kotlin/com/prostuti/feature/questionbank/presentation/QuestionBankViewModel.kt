@@ -28,6 +28,11 @@ class QuestionBankViewModel(
 
     fun onEvent(event: QuestionBankUiEvent) {
         when (event) {
+            is QuestionBankUiEvent.NavigateView -> navigateView(event.view)
+            is QuestionBankUiEvent.OpenSubjectStudy -> openSubjectStudy(event.subject)
+            is QuestionBankUiEvent.OpenSessionModal -> openSessionModal(event.session)
+            is QuestionBankUiEvent.CloseSessionModal -> closeSessionModal()
+            is QuestionBankUiEvent.UpdateSearchQuery -> updateSearchQuery(event.query)
             is QuestionBankUiEvent.SelectSession -> selectSession(event.sessionName)
             is QuestionBankUiEvent.SelectSubject -> selectSubject(event.subject)
             is QuestionBankUiEvent.SelectOption -> selectOption(event.questionId, event.option)
@@ -35,6 +40,55 @@ class QuestionBankViewModel(
             is QuestionBankUiEvent.ChangePage -> changePage(event.page)
             is QuestionBankUiEvent.Retry -> loadInitialData()
         }
+    }
+
+    private fun navigateView(view: QuestionBankView) {
+        _uiState.update { state ->
+            if (state is QuestionBankUiState.Success) state.copy(view = view) else state
+        }
+    }
+
+    private fun openSessionModal(session: BcsSessionSummaryDto) {
+        _uiState.update { state ->
+            if (state is QuestionBankUiState.Success) state.copy(activeModalSession = session) else state
+        }
+    }
+
+    private fun closeSessionModal() {
+        _uiState.update { state ->
+            if (state is QuestionBankUiState.Success) state.copy(activeModalSession = null) else state
+        }
+    }
+
+    private fun updateSearchQuery(query: String) {
+        _uiState.update { state ->
+            if (state is QuestionBankUiState.Success) state.copy(searchQuery = query) else state
+        }
+    }
+
+    private fun openSubjectStudy(subject: Subject) {
+        val current = _uiState.value as? QuestionBankUiState.Success ?: return
+        val sessionName = current.selectedSession.ifBlank {
+            current.sessions.firstOrNull()?.sessionName ?: "47th BCS Preliminary"
+        }
+        loadQuestionsForSession(
+            sessions = current.sessions,
+            sessionName = sessionName,
+            subject = subject,
+            page = 0,
+            overrideView = QuestionBankView.STUDY,
+        )
+    }
+
+    fun viewQuestionsForSession(session: BcsSessionSummaryDto) {
+        val current = _uiState.value as? QuestionBankUiState.Success ?: return
+        loadQuestionsForSession(
+            sessions = current.sessions,
+            sessionName = session.sessionName,
+            subject = null,
+            page = 0,
+            overrideView = QuestionBankView.STUDY,
+        )
     }
 
     private fun loadInitialData() {
@@ -48,6 +102,7 @@ class QuestionBankViewModel(
                     val sessions = sessionsResult.value
                     if (sessions.isEmpty()) {
                         _uiState.value = QuestionBankUiState.Success(
+                            view = QuestionBankView.HOME,
                             sessions = emptyList(),
                             selectedSession = "",
                             selectedSubject = null,
@@ -63,6 +118,7 @@ class QuestionBankViewModel(
                         sessionName = initialSession,
                         subject = null,
                         page = 0,
+                        overrideView = QuestionBankView.HOME,
                     )
                 }
             }
@@ -107,6 +163,7 @@ class QuestionBankViewModel(
         sessionName: String,
         subject: Subject?,
         page: Int,
+        overrideView: QuestionBankView? = null,
     ) {
         val current = _uiState.value as? QuestionBankUiState.Success
         if (current != null) {
@@ -121,6 +178,7 @@ class QuestionBankViewModel(
                 is Result.Success -> {
                     val pageData = result.value
                     _uiState.value = QuestionBankUiState.Success(
+                        view = overrideView ?: current?.view ?: QuestionBankView.HOME,
                         sessions = sessions,
                         selectedSession = sessionName,
                         selectedSubject = subject,
@@ -131,6 +189,8 @@ class QuestionBankViewModel(
                         selectedOptions = emptyMap(),
                         expandedExplanations = emptySet(),
                         isRefreshingQuestions = false,
+                        activeModalSession = null,
+                        searchQuery = current?.searchQuery ?: "",
                     )
                 }
             }

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.prostuti.core.common.Result
 import com.prostuti.feature.auth.domain.LoginUseCase
+import com.prostuti.feature.auth.domain.LoginWithGoogleUseCase
 import com.prostuti.feature.auth.domain.RegisterUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,6 +21,7 @@ class AuthViewModel(
     private val mode: AuthUiState.Mode,
     private val loginUseCase: LoginUseCase,
     private val registerUseCase: RegisterUseCase,
+    private val loginWithGoogleUseCase: LoginWithGoogleUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle(mode))
@@ -63,6 +65,24 @@ class AuthViewModel(
                 AuthUiState.Mode.LOGIN -> loginUseCase(st.email, st.password)
                 AuthUiState.Mode.REGISTER -> registerUseCase(st.name, st.email, st.password)
             }
+            _uiState.update {
+                when (result) {
+                    is Result.Success ->
+                        AuthUiState.Authenticated(mode, result.value)
+                    is Result.Error ->
+                        (it as AuthUiState.Idle).copy(loading = false, error = result.message)
+                }
+            }
+        }
+    }
+
+    fun loginWithGoogle(idToken: String) {
+        val st = _uiState.value
+        if (st !is AuthUiState.Idle || st.loading) return
+
+        viewModelScope.launch {
+            _uiState.update { (it as AuthUiState.Idle).copy(loading = true, error = null) }
+            val result = loginWithGoogleUseCase(idToken)
             _uiState.update {
                 when (result) {
                     is Result.Success ->

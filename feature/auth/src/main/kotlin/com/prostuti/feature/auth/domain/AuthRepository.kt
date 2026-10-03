@@ -12,6 +12,7 @@ import com.prostuti.core.model.Role
 interface AuthRepository {
     suspend fun register(name: String, email: String, password: String): Result<AuthResponse>
     suspend fun login(email: String, password: String): Result<AuthResponse>
+    suspend fun loginWithGoogle(idToken: String): Result<AuthResponse>
     suspend fun me(): Result<MeResponse>
     fun clearSession()
     fun hasSession(): Boolean

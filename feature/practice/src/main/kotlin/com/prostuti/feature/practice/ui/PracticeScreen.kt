@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -72,6 +73,7 @@ import androidx.compose.ui.unit.sp
 import com.prostuti.core.designsystem.ProstutiBadge
 import com.prostuti.core.designsystem.ProstutiButton
 import com.prostuti.core.designsystem.ProstutiProgressBar
+import com.prostuti.core.designsystem.QuestionCardSkeleton
 import com.prostuti.core.model.Option
 import com.prostuti.core.model.PracticeSessionQuestionDto
 import com.prostuti.core.model.Subject
@@ -191,21 +193,20 @@ fun PracticeScreen(
             }
 
             is PracticeUiState.Loading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(20.dp),
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                    if (state.message.isNotBlank()) {
                         Text(
                             text = state.message,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(bottom = 16.dp),
                         )
                     }
+                    QuestionCardSkeleton()
                 }
             }
 
@@ -447,8 +448,8 @@ private fun ActiveSessionContent(
                         OutlinedButton(
                             onClick = onFinish,
                             shape = RoundedCornerShape(10.dp),
-                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                            modifier = Modifier.height(32.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                            modifier = Modifier.defaultMinSize(minHeight = 44.dp),
                         ) {
                             Text("শেষ করুন", style = MaterialTheme.typography.labelSmall)
                         }
