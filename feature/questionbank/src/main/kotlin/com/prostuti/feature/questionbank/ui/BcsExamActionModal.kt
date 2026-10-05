@@ -196,15 +196,19 @@ fun BcsExamActionModal(
             Spacer(Modifier.height(24.dp))
 
             // CTA 1: "পরীক্ষা শুরু করুন" (Start Exam)
+            val hasQuestions = session.totalQuestions > 0
             Button(
                 onClick = {
                     onDismiss()
                     onStartExam(session.sessionName)
                 },
+                enabled = hasQuestions,
                 shape = RoundedCornerShape(14.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -217,7 +221,7 @@ fun BcsExamActionModal(
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "পরীক্ষা শুরু করুন",
+                    text = if (hasQuestions) "পরীক্ষা শুরু করুন" else "পরীক্ষা শীঘ্রই আসছে",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
                 )
@@ -231,8 +235,13 @@ fun BcsExamActionModal(
                     onDismiss()
                     onViewQuestions(session)
                 },
+                enabled = hasQuestions,
                 shape = RoundedCornerShape(14.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                border = BorderStroke(1.dp, if (hasQuestions) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = 48.dp),
@@ -240,15 +249,14 @@ fun BcsExamActionModal(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.MenuBook,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = if (hasQuestions) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     modifier = Modifier.size(20.dp),
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "প্রশ্নগুলো দেখুন",
+                    text = if (hasQuestions) "প্রশ্নগুলো দেখুন" else "প্রশ্ন শীঘ্রই যুক্ত হবে",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
                 )
             }
         }

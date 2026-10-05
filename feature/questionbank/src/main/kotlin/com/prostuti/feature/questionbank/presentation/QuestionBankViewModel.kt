@@ -77,12 +77,9 @@ class QuestionBankViewModel(
 
     private fun openSubjectStudy(subject: Subject) {
         val current = _uiState.value as? QuestionBankUiState.Success ?: return
-        val sessionName = current.selectedSession.ifBlank {
-            current.sessions.firstOrNull()?.sessionName ?: "47th BCS Preliminary"
-        }
         loadQuestionsForSession(
             sessions = current.sessions,
-            sessionName = sessionName,
+            sessionName = "",
             subject = subject,
             page = 0,
             overrideView = QuestionBankView.STUDY,
@@ -134,7 +131,8 @@ class QuestionBankViewModel(
                         )
                         return@launch
                     }
-                    val initialSession = sessions.first().sessionName
+                    val initialSession = sessions.firstOrNull { it.totalQuestions > 0 }?.sessionName
+                        ?: sessions.first().sessionName
                     loadQuestionsForSession(
                         sessions = sessions,
                         sessionName = initialSession,

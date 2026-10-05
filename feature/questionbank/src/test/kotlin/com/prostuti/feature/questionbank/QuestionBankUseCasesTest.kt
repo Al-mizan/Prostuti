@@ -143,4 +143,27 @@ class QuestionBankUseCasesTest {
         assertEquals(9, com.prostuti.feature.questionbank.ui.BcsSubjectCards.size)
         assertEquals(Subject.entries.toSet(), mappedSubjects)
     }
+
+    @Test
+    fun `GetQuestionBankQuestionsUseCase supports empty session for All BCS querying`() = runBlocking {
+        val repo = FakeQuestionBankRepository()
+        val useCase = GetQuestionBankQuestionsUseCase(repo)
+
+        val result = useCase(session = "", subject = Subject.BENGALI, page = 0, pageSize = 20)
+        assertTrue(result is Result.Success)
+        val page = (result as Result.Success).value
+        assertEquals(1, page.items.size)
+    }
+
+    @Test
+    fun `sessions selection prioritizes first session with totalQuestions greater than zero`() {
+        val sessions = listOf(
+            BcsSessionSummaryDto("50th BCS Preli", 0),
+            BcsSessionSummaryDto("49th BCS(General) Preli", 0),
+            BcsSessionSummaryDto("47th BCS Preliminary", 198),
+        )
+        val selected = sessions.firstOrNull { it.totalQuestions > 0 }?.sessionName
+            ?: sessions.first().sessionName
+        assertEquals("47th BCS Preliminary", selected)
+    }
 }

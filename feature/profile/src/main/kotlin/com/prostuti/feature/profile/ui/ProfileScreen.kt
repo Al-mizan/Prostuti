@@ -301,7 +301,9 @@ fun ProfileScreen(
                             Text(
                                 text = preset.quoteBangla,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface,
+                                // black color for better readability on light backgrounds
+                                color = Color.Black,
+                                // color = MaterialTheme.colorScheme.onSurface,
                                 fontWeight = FontWeight.Medium,
                             )
                         }

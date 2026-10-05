@@ -352,7 +352,8 @@ private fun QuestionBankContent(
                     }
                     Column {
                         Text(
-                            text = state.selectedSubject?.toBanglaName() ?: state.selectedSession.ifBlank { "বিসিএস প্রশ্ন ব্যাংক" },
+                            text = state.selectedSubject?.toBanglaName()
+                                ?: if (state.selectedSession.isBlank() || state.selectedSession.equals("ALL", ignoreCase = true)) "বিসিএস প্রশ্ন ব্যাংক" else state.selectedSession.toBanglaDigits(),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
@@ -475,6 +476,8 @@ private fun SessionSelectorDropdown(
     onSelectSession: (String) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val isAllSelected = selectedSession.isBlank() || selectedSession.equals("ALL", ignoreCase = true)
+    val displayText = if (isAllSelected) "সকল বিসিএস" else selectedSession.toBanglaDigits()
 
     Box {
         Surface(
@@ -488,7 +491,7 @@ private fun SessionSelectorDropdown(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = selectedSession.toBanglaDigits(),
+                    text = displayText,
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -508,6 +511,26 @@ private fun SessionSelectorDropdown(
             onDismissRequest = { expanded = false },
             modifier = Modifier.background(MaterialTheme.colorScheme.surface),
         ) {
+            DropdownMenuItem(
+                text = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = "সকল বিসিএস",
+                            fontWeight = if (isAllSelected) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isAllSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                },
+                onClick = {
+                    expanded = false
+                    onSelectSession("")
+                },
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
             sessions.forEach { session ->
                 val isSelected = session.sessionName == selectedSession
                 DropdownMenuItem(
@@ -524,7 +547,7 @@ private fun SessionSelectorDropdown(
                             )
                             Spacer(Modifier.width(16.dp))
                             ProstutiBadge(
-                                text = "${session.totalQuestions.toBanglaDigits()} প্রশ্ন",
+                                text = if (session.totalQuestions > 0) "${session.totalQuestions.toBanglaDigits()} প্রশ্ন" else "শীঘ্রই",
                                 containerColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
                                 contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -639,6 +662,14 @@ private fun QuestionStudyCard(
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
+
+                    if (question.examSession.isNotBlank()) {
+                        ProstutiBadge(
+                            text = question.examSession.toBanglaDigits(),
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
 
                 val topic = question.topic
