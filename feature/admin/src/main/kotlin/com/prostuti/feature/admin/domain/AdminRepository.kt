@@ -27,4 +27,8 @@ interface AdminRepository {
     suspend fun deleteQuestion(id: String): Result<Unit>
     suspend fun getUsers(): Result<List<AdminUserDto>>
     suspend fun updateUserRole(id: String, role: Role): Result<AdminUserDto>
+    suspend fun getModelTests(): Result<List<com.prostuti.core.model.ModelTestDto>>
+    suspend fun createModelTest(request: com.prostuti.core.model.CreateModelTestRequest): Result<com.prostuti.core.model.ModelTestDto>
+    suspend fun updateModelTest(id: String, request: com.prostuti.core.model.UpdateModelTestRequest): Result<com.prostuti.core.model.ModelTestDto>
+    suspend fun deleteModelTest(id: String): Result<Boolean>
 }

@@ -3,6 +3,7 @@ package com.prostuti.feature.admin.presentation
 import com.prostuti.core.model.AdminQuestionDto
 import com.prostuti.core.model.AdminUserDto
 import com.prostuti.core.model.ImportSummary
+import com.prostuti.core.model.ModelTestDto
 import com.prostuti.core.model.QuestionType
 import com.prostuti.core.model.Subject
 
@@ -10,6 +11,7 @@ enum class AdminTab(val title: String) {
     CSV_IMPORT("CSV ইমপোর্ট"),
     QUESTIONS("প্রশ্নসমূহ"),
     USERS("ব্যবহারকারী"),
+    MODEL_TESTS("মডেল টেস্ট"),
 }
 
 sealed interface CsvImportStatus {
@@ -59,6 +61,15 @@ data class AdminUiState(
     // Users Tab
     val usersStatus: AdminUsersStatus = AdminUsersStatus.Loading,
     val updatingUserRoleId: String? = null,
+
+    // Model Tests Tab
+    val modelTests: List<ModelTestDto> = emptyList(),
+    val isLoadingModelTests: Boolean = false,
+    val showModelTestDialog: Boolean = false,
+    val editingModelTest: ModelTestDto? = null,
+    val isSavingModelTest: Boolean = false,
+    val modelTestToDelete: ModelTestDto? = null,
+    val isDeletingModelTest: Boolean = false,
 
     // Banner / Snackbar notification
     val userMessage: String? = null,

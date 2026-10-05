@@ -2,15 +2,20 @@ package com.prostuti.feature.questionbank
 
 import com.prostuti.core.common.Result
 import com.prostuti.core.model.BcsSessionSummaryDto
+import com.prostuti.core.model.ModelTestDto
+import com.prostuti.core.model.ModelTestStatus
 import com.prostuti.core.model.Option
 import com.prostuti.core.model.Page
 import com.prostuti.core.model.QuestionBankItemDto
 import com.prostuti.core.model.Subject
+import com.prostuti.feature.questionbank.domain.GetAllModelTestsUseCase
 import com.prostuti.feature.questionbank.domain.GetBcsSessionsUseCase
+import com.prostuti.feature.questionbank.domain.GetLiveModelTestUseCase
 import com.prostuti.feature.questionbank.domain.GetQuestionBankQuestionsUseCase
 import com.prostuti.feature.questionbank.domain.QuestionBankRepository
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -37,6 +42,21 @@ class QuestionBankUseCasesTest {
             )
         )
 
+        val sampleModelTests = listOf(
+            ModelTestDto(
+                id = "mt-1",
+                title = "৪৭তম বিসিএস বিশেষ লাইভ মডেল টেস্ট",
+                description = "পূর্ণাঙ্গ সিলেবাস",
+                examSession = "47th BCS Preliminary",
+                durationMinutes = 120,
+                totalMarks = 200.0,
+                totalQuestions = 200,
+                startTime = "2026-10-01T00:00:00Z",
+                endTime = "2026-10-20T00:00:00Z",
+                status = ModelTestStatus.LIVE,
+            )
+        )
+
         override suspend fun getSessions(): Result<List<BcsSessionSummaryDto>> =
             Result.Success(sampleSessions)
 
@@ -47,6 +67,37 @@ class QuestionBankUseCasesTest {
             pageSize: Int,
         ): Result<Page<QuestionBankItemDto>> =
             Result.Success(Page(sampleQuestions, page, pageSize, sampleQuestions.size))
+
+        override suspend fun getLiveModelTest(): Result<ModelTestDto?> =
+            Result.Success(sampleModelTests.firstOrNull { it.status == ModelTestStatus.LIVE })
+
+        override suspend fun getAllModelTests(status: String?): Result<List<ModelTestDto>> =
+            Result.Success(sampleModelTests)
+    }
+
+    @Test
+    fun `GetLiveModelTestUseCase returns active live model test`() = runBlocking {
+        val repo = FakeQuestionBankRepository()
+        val useCase = GetLiveModelTestUseCase(repo)
+
+        val result = useCase()
+        assertTrue(result is Result.Success)
+        val liveTest = (result as Result.Success).value
+        assertNotNull(liveTest)
+        assertEquals("mt-1", liveTest?.id)
+        assertEquals(ModelTestStatus.LIVE, liveTest?.status)
+    }
+
+    @Test
+    fun `GetAllModelTestsUseCase returns all model tests`() = runBlocking {
+        val repo = FakeQuestionBankRepository()
+        val useCase = GetAllModelTestsUseCase(repo)
+
+        val result = useCase()
+        assertTrue(result is Result.Success)
+        val list = (result as Result.Success).value
+        assertEquals(1, list.size)
+        assertEquals("৪৭তম বিসিএস বিশেষ লাইভ মডেল টেস্ট", list.first().title)
     }
 
     @Test

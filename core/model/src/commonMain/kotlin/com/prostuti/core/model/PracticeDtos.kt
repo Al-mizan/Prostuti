@@ -19,6 +19,7 @@ data class PracticeSessionQuestionDto(
     val optionD: String,
     val topic: String? = null,
     val difficulty: Difficulty? = null,
+    val examSession: String? = null,
 )
 
 @Serializable

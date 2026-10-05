@@ -1,9 +1,12 @@
 package com.prostuti.feature.admin.presentation
 
 import com.prostuti.core.model.AdminQuestionDto
+import com.prostuti.core.model.CreateModelTestRequest
+import com.prostuti.core.model.ModelTestDto
 import com.prostuti.core.model.QuestionType
 import com.prostuti.core.model.Role
 import com.prostuti.core.model.Subject
+import com.prostuti.core.model.UpdateModelTestRequest
 import com.prostuti.core.model.UpdateQuestionRequest
 
 sealed interface AdminUiEvent {
@@ -32,6 +35,17 @@ sealed interface AdminUiEvent {
     // Users Tab Events
     data object RefreshUsers : AdminUiEvent
     data class ToggleUserRole(val userId: String, val currentRole: Role) : AdminUiEvent
+
+    // Model Tests Tab Events
+    data object RefreshModelTests : AdminUiEvent
+    data object OpenCreateModelTestDialog : AdminUiEvent
+    data class OpenEditModelTestDialog(val modelTest: ModelTestDto) : AdminUiEvent
+    data object DismissModelTestDialog : AdminUiEvent
+    data class CreateModelTest(val request: CreateModelTestRequest) : AdminUiEvent
+    data class UpdateModelTest(val id: String, val request: UpdateModelTestRequest) : AdminUiEvent
+    data class RequestDeleteModelTest(val modelTest: ModelTestDto) : AdminUiEvent
+    data object DismissDeleteModelTestDialog : AdminUiEvent
+    data object ConfirmDeleteModelTest : AdminUiEvent
 
     // Notifications
     data object DismissUserMessage : AdminUiEvent

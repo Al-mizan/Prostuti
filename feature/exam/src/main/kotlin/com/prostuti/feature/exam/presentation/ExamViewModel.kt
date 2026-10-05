@@ -22,15 +22,61 @@ class ExamViewModel(
     private val startExamSession: StartExamSessionUseCase,
     private val submitExamUseCase: SubmitExamUseCase,
     private val getLeaderboardUseCase: GetLeaderboardUseCase,
+    initialSessionName: String? = null,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<ExamUiState>(ExamUiState.Setup())
+    private val _uiState = MutableStateFlow<ExamUiState>(
+        if (!initialSessionName.isNullOrBlank()) {
+            ExamUiState.Loading("পরীক্ষার প্রশ্নপত্র প্রস্তুত করা হচ্ছে...")
+        } else {
+            ExamUiState.Setup()
+        }
+    )
     val uiState: StateFlow<ExamUiState> = _uiState.asStateFlow()
 
     private var timerJob: Job? = null
+    private var initialSessionHandled = false
 
     init {
         loadAvailableSessions()
+        if (!initialSessionName.isNullOrBlank()) {
+            setInitialSession(initialSessionName, autoStart = true)
+        }
+    }
+
+    fun setInitialSession(sessionName: String?, autoStart: Boolean = true) {
+        if (sessionName.isNullOrBlank() || initialSessionHandled) return
+        initialSessionHandled = true
+
+        val current = _uiState.value
+        if (current is ExamUiState.Setup) {
+            _uiState.value = current.copy(selectedSession = sessionName)
+        }
+
+        if (autoStart) {
+            viewModelScope.launch {
+                val setup = _uiState.value as? ExamUiState.Setup
+                var matchingSession = setup?.availableSessions?.find { it.sessionName == sessionName }
+                if (matchingSession == null && (setup == null || setup.isLoadingSessions || setup.availableSessions.isEmpty())) {
+                    val sessionsResult = getAvailableSessions()
+                    if (sessionsResult is Result.Success) {
+                        matchingSession = sessionsResult.value.find { it.sessionName == sessionName }
+                        _uiState.update { state ->
+                            if (state is ExamUiState.Setup) {
+                                state.copy(availableSessions = sessionsResult.value, isLoadingSessions = false)
+                            } else state
+                        }
+                    }
+                }
+                val count = matchingSession?.totalQuestions ?: setup?.selectedQuestionCount ?: 50
+                val duration = matchingSession?.durationMinutes ?: setup?.selectedDurationMinutes ?: 30
+                startExamInternal(
+                    targetSession = sessionName,
+                    count = count,
+                    durationMins = duration,
+                )
+            }
+        }
     }
 
     fun onEvent(event: ExamUiEvent) {
@@ -61,7 +107,11 @@ class ExamViewModel(
             is ExamUiEvent.ConfirmSubmit -> submitExam()
 
             is ExamUiEvent.SwitchResultTab -> switchResultTab(event.tab)
-            is ExamUiEvent.RetakeExam -> startExam()
+            is ExamUiEvent.RetakeExam -> {
+                val currentResult = _uiState.value as? ExamUiState.ResultSummary
+                val session = currentResult?.result?.examSession
+                startExam(sessionName = session)
+            }
             is ExamUiEvent.ResetToSetup -> resetToSetup()
         }
     }
@@ -72,32 +122,54 @@ class ExamViewModel(
                 is Result.Success -> {
                     val sessions = result.value
                     val defaultSession = sessions.firstOrNull()?.sessionName ?: "47th BCS Preliminary"
-                    _uiState.value = ExamUiState.Setup(
-                        availableSessions = sessions,
-                        selectedSession = defaultSession,
-                        isLoadingSessions = false,
-                    )
+                    _uiState.update { current ->
+                        if (current !is ExamUiState.Setup) return@update current
+                        current.copy(
+                            availableSessions = sessions,
+                            selectedSession = current.selectedSession.ifBlank { defaultSession },
+                            isLoadingSessions = false,
+                        )
+                    }
                 }
                 is Result.Error -> {
-                    _uiState.value = ExamUiState.Setup(
-                        isLoadingSessions = false,
-                        errorMessage = result.message,
-                    )
+                    _uiState.update { current ->
+                        if (current !is ExamUiState.Setup) return@update current
+                        current.copy(
+                            isLoadingSessions = false,
+                            errorMessage = result.message,
+                        )
+                    }
                 }
             }
         }
     }
 
-    private fun startExam() {
+    fun startExam(
+        sessionName: String? = null,
+        questionCount: Int? = null,
+        durationMinutes: Int? = null,
+    ) {
         val setup = _uiState.value as? ExamUiState.Setup
-        val sessionName = setup?.selectedSession ?: "47th BCS Preliminary"
-        val count = setup?.selectedQuestionCount ?: 50
-        val durationMins = setup?.selectedDurationMinutes ?: 30
+        val targetSession = sessionName
+            ?: setup?.selectedSession?.takeIf { it.isNotBlank() }
+            ?: "47th BCS Preliminary"
 
+        val matchingSession = setup?.availableSessions?.find { it.sessionName == targetSession }
+        val count = questionCount ?: matchingSession?.totalQuestions ?: setup?.selectedQuestionCount ?: 50
+        val durationMins = durationMinutes ?: matchingSession?.durationMinutes ?: setup?.selectedDurationMinutes ?: 30
+
+        startExamInternal(targetSession, count, durationMins)
+    }
+
+    private fun startExamInternal(
+        targetSession: String,
+        count: Int,
+        durationMins: Int,
+    ) {
         _uiState.value = ExamUiState.Loading("পরীক্ষার প্রশ্নপত্র প্রস্তুত করা হচ্ছে...")
 
         viewModelScope.launch {
-            when (val result = startExamSession(sessionName, count, durationMins)) {
+            when (val result = startExamSession(targetSession, count, durationMins)) {
                 is Result.Error -> {
                     _uiState.value = ExamUiState.Error(result.message)
                 }
@@ -263,6 +335,8 @@ class ExamViewModel(
 
     private fun resetToSetup() {
         timerJob?.cancel()
+        initialSessionHandled = false
+        _uiState.value = ExamUiState.Setup()
         loadAvailableSessions()
     }
 

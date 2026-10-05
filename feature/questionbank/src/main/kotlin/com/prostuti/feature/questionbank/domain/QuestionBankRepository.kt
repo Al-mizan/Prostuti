@@ -2,6 +2,7 @@ package com.prostuti.feature.questionbank.domain
 
 import com.prostuti.core.common.Result
 import com.prostuti.core.model.BcsSessionSummaryDto
+import com.prostuti.core.model.ModelTestDto
 import com.prostuti.core.model.Page
 import com.prostuti.core.model.QuestionBankItemDto
 import com.prostuti.core.model.Subject
@@ -14,4 +15,6 @@ interface QuestionBankRepository {
         page: Int,
         pageSize: Int,
     ): Result<Page<QuestionBankItemDto>>
+    suspend fun getLiveModelTest(): Result<ModelTestDto?>
+    suspend fun getAllModelTests(status: String? = null): Result<List<ModelTestDto>>
 }

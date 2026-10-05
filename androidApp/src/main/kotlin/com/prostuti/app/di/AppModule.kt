@@ -28,4 +28,5 @@ val appModule = module {
     single { com.prostuti.core.network.ExamApi(client = get()) }
     single { com.prostuti.core.network.HistoryApi(client = get()) }
     single { com.prostuti.core.network.AdminApi(client = get()) }
+    single<com.prostuti.core.network.ModelTestApi> { com.prostuti.core.network.ModelTestApiImpl(client = get()) }
 }

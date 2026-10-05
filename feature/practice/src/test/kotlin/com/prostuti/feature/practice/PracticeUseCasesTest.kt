@@ -106,4 +106,19 @@ class PracticeUseCasesTest {
         assertEquals(1, summary.correctCount)
         assertEquals(0, summary.incorrectCount)
     }
+
+    @Test
+    fun `PracticeSessionQuestionDto supports examSession pill badge metadata`() {
+        val question = PracticeSessionQuestionDto(
+            id = "pq-bcs",
+            subject = Subject.BENGALI,
+            questionText = "চর্যাপদ কোন ছন্দে রচিত?",
+            optionA = "মাত্রাবৃত্ত",
+            optionB = "অক্ষরবৃত্ত",
+            optionC = "স্বরমাত্রিক",
+            optionD = "মুক্তক",
+            examSession = "৪৪তম বিসিএস",
+        )
+        assertEquals("৪৪তম বিসিএস", question.examSession)
+    }
 }

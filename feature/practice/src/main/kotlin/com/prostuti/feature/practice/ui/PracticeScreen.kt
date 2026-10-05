@@ -80,6 +80,7 @@ import com.prostuti.core.designsystem.ProstutiButton
 import com.prostuti.core.designsystem.ProstutiErrorView
 import com.prostuti.core.designsystem.ProstutiProgressBar
 import com.prostuti.core.designsystem.QuestionCardSkeleton
+import com.prostuti.core.designsystem.UnifiedSubjectCard
 import com.prostuti.core.designsystem.parseErrorType
 import com.prostuti.core.model.Option
 import com.prostuti.core.model.PracticeSessionQuestionDto
@@ -367,80 +368,16 @@ private fun SubjectSelectContent(
             modifier = Modifier.fillMaxWidth(),
         ) {
             items(SubjectMetaList) { meta ->
-                Card(
+                UnifiedSubjectCard(
+                    title = meta.banglaName,
+                    marks = meta.marks,
+                    icon = meta.icon,
+                    accentColor = meta.color,
+                    containerColor = meta.bgColor,
+                    subtitle = "${selectedCount.toBanglaDigits()}টি প্রশ্ন",
+                    actionBadgeText = "অনুশীলন",
                     onClick = { onStartPractice(meta.subject, selectedCount) },
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(1.dp, meta.color.copy(alpha = 0.25f)),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp, pressedElevation = 4.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(14.dp),
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(42.dp)
-                                    .clip(CircleShape)
-                                    .background(meta.bgColor),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    meta.icon,
-                                    contentDescription = null,
-                                    tint = meta.color,
-                                    modifier = Modifier.size(22.dp),
-                                )
-                            }
-
-                            ProstutiBadge(
-                                text = meta.marks,
-                                containerColor = meta.bgColor,
-                                contentColor = meta.color,
-                            )
-                        }
-
-                        Text(
-                            text = meta.banglaName,
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            minLines = 2,
-                            lineHeight = 18.sp,
-                        )
-
-                        Text(
-                            text = "${selectedCount.toBanglaDigits()}টি প্রশ্নের কুইজ",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            Text(
-                                text = "অনুশীলন করুন",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = meta.color,
-                            )
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowForward,
-                                contentDescription = null,
-                                tint = meta.color,
-                                modifier = Modifier.size(14.dp),
-                            )
-                        }
-                    }
-                }
+                )
             }
         }
     }
@@ -513,14 +450,30 @@ private fun ActiveSessionContent(
                 .padding(20.dp),
         ) {
             val topic = question.topic
-            if (!topic.isNullOrBlank()) {
-                Text(
-                    text = topic,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Spacer(Modifier.height(4.dp))
+            val examSession = question.examSession
+            if (!topic.isNullOrBlank() || !examSession.isNullOrBlank()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (!examSession.isNullOrBlank()) {
+                        ProstutiBadge(
+                            text = examSession,
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                        )
+                    }
+                    if (!topic.isNullOrBlank()) {
+                        Text(
+                            text = topic,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
             }
 
             Text(

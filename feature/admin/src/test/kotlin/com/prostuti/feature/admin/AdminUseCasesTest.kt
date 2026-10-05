@@ -118,6 +118,67 @@ class AdminUseCasesTest {
             return if (removed) Result.Success(Unit) else Result.Error("Not found")
         }
 
+        val sampleModelTests = mutableListOf(
+            ModelTestDto(
+                id = "mt-1",
+                title = "47th BCS Special Model Test",
+                description = "Full length model test",
+                examSession = "47th BCS Preliminary",
+                durationMinutes = 120,
+                totalMarks = 200.0,
+                totalQuestions = 200,
+                startTime = "2026-10-01T10:00:00Z",
+                endTime = "2026-10-10T10:00:00Z",
+                status = ModelTestStatus.LIVE,
+                isPublished = true,
+            )
+        )
+
+        override suspend fun getModelTests(): Result<List<ModelTestDto>> =
+            Result.Success(sampleModelTests.toList())
+
+        override suspend fun createModelTest(request: CreateModelTestRequest): Result<ModelTestDto> {
+            val created = ModelTestDto(
+                id = "mt-${sampleModelTests.size + 1}",
+                title = request.title,
+                description = request.description,
+                examSession = request.examSession,
+                durationMinutes = request.durationMinutes,
+                totalMarks = request.totalMarks,
+                totalQuestions = request.totalQuestions,
+                startTime = request.startTime,
+                endTime = request.endTime,
+                status = ModelTestStatus.UPCOMING,
+                isPublished = request.isPublished,
+            )
+            sampleModelTests.add(created)
+            return Result.Success(created)
+        }
+
+        override suspend fun updateModelTest(id: String, request: UpdateModelTestRequest): Result<ModelTestDto> {
+            val idx = sampleModelTests.indexOfFirst { it.id == id }
+            if (idx == -1) return Result.Error("Model test not found")
+            val current = sampleModelTests[idx]
+            val updated = current.copy(
+                title = request.title ?: current.title,
+                description = request.description ?: current.description,
+                examSession = request.examSession ?: current.examSession,
+                durationMinutes = request.durationMinutes ?: current.durationMinutes,
+                totalMarks = request.totalMarks ?: current.totalMarks,
+                totalQuestions = request.totalQuestions ?: current.totalQuestions,
+                startTime = request.startTime ?: current.startTime,
+                endTime = request.endTime ?: current.endTime,
+                isPublished = request.isPublished ?: current.isPublished,
+            )
+            sampleModelTests[idx] = updated
+            return Result.Success(updated)
+        }
+
+        override suspend fun deleteModelTest(id: String): Result<Boolean> {
+            val removed = sampleModelTests.removeIf { it.id == id }
+            return Result.Success(removed)
+        }
+
         override suspend fun getUsers(): Result<List<AdminUserDto>> =
             Result.Success(sampleUsers)
 
@@ -223,5 +284,59 @@ class AdminUseCasesTest {
         val promoteRes = updateRole("u-student", Role.ADMIN)
         assertTrue(promoteRes is Result.Success)
         assertEquals(Role.ADMIN, (promoteRes as Result.Success).value.role)
+    }
+
+    @Test
+    fun `ModelTest use cases create, get, update, and delete correctly`() = runBlocking {
+        val repo = FakeAdminRepository()
+        val getTests = GetAdminModelTestsUseCase(repo)
+        val createTest = CreateAdminModelTestUseCase(repo)
+        val updateTest = UpdateAdminModelTestUseCase(repo)
+        val deleteTest = DeleteAdminModelTestUseCase(repo)
+
+        // Get initial
+        val initial = getTests()
+        assertTrue(initial is Result.Success)
+        assertEquals(1, (initial as Result.Success).value.size)
+
+        // Create new
+        val createReq = CreateModelTestRequest(
+            title = "48th BCS Model Test 1",
+            description = "Special Preli Model Test",
+            examSession = "48th BCS Preliminary",
+            durationMinutes = 120,
+            totalMarks = 200.0,
+            totalQuestions = 200,
+            startTime = "2026-11-01T10:00:00Z",
+            endTime = "2026-11-10T10:00:00Z",
+            isPublished = true,
+        )
+        val createdRes = createTest(createReq)
+        assertTrue(createdRes is Result.Success)
+        val created = (createdRes as Result.Success).value
+        assertEquals("48th BCS Model Test 1", created.title)
+        assertEquals("mt-2", created.id)
+
+        // Verify size
+        val afterCreate = getTests()
+        assertTrue(afterCreate is Result.Success)
+        assertEquals(2, (afterCreate as Result.Success).value.size)
+
+        // Update
+        val updateReq = UpdateModelTestRequest(
+            title = "48th BCS Model Test 1 (Updated)",
+        )
+        val updatedRes = updateTest("mt-2", updateReq)
+        assertTrue(updatedRes is Result.Success)
+        assertEquals("48th BCS Model Test 1 (Updated)", (updatedRes as Result.Success).value.title)
+
+        // Delete
+        val deleteRes = deleteTest("mt-2")
+        assertTrue(deleteRes is Result.Success)
+        assertTrue((deleteRes as Result.Success).value)
+
+        val afterDelete = getTests()
+        assertTrue(afterDelete is Result.Success)
+        assertEquals(1, (afterDelete as Result.Success).value.size)
     }
 }

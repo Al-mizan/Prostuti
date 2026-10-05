@@ -17,13 +17,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import android.net.Uri
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.prostuti.core.common.SessionStore
 import com.prostuti.core.designsystem.ProstutiBadge
 import com.prostuti.core.designsystem.ProstutiButton
@@ -40,8 +43,16 @@ object Routes {
     const val Register = "auth/register"
     const val Main = "main"
     const val Admin = "admin"
-    const val Exam = "exam"
+    const val Exam = "exam?session={session}"
     const val History = "history"
+
+    fun exam(session: String? = null): String {
+        return if (!session.isNullOrBlank()) {
+            "exam?session=${Uri.encode(session)}"
+        } else {
+            "exam"
+        }
+    }
 }
 
 @Composable
@@ -101,8 +112,8 @@ fun ProstutiNavGraph() {
                 onNavigateToAdmin = {
                     navController.navigate(Routes.Admin)
                 },
-                onNavigateToExam = {
-                    navController.navigate(Routes.Exam)
+                onNavigateToExam = { session ->
+                    navController.navigate(Routes.exam(session))
                 },
                 onNavigateToHistory = {
                     navController.navigate(Routes.History)
@@ -118,10 +129,24 @@ fun ProstutiNavGraph() {
             )
         }
 
-        composable(Routes.Exam) {
-            val viewModel: com.prostuti.feature.exam.presentation.ExamViewModel = koinViewModel()
+        composable(
+            route = Routes.Exam,
+            arguments = listOf(
+                navArgument("session") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) { backStackEntry ->
+            val rawSession = backStackEntry.arguments?.getString("session")
+            val sessionName = rawSession?.takeIf { it.isNotBlank() && it != "{session}" }
+            val viewModel: com.prostuti.feature.exam.presentation.ExamViewModel = koinViewModel {
+                parametersOf(sessionName)
+            }
             com.prostuti.feature.exam.ui.ExamScreen(
                 viewModel = viewModel,
+                initialSessionName = sessionName,
                 onNavigateBack = { navController.popBackStack() }
             )
         }

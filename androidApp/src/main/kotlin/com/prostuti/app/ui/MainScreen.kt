@@ -63,7 +63,7 @@ fun MainScreen(
     sessionStore: SessionStore,
     onLoggedOut: () -> Unit,
     onNavigateToAdmin: () -> Unit,
-    onNavigateToExam: () -> Unit,
+    onNavigateToExam: (String?) -> Unit,
     onNavigateToHistory: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -137,7 +137,7 @@ fun MainScreen(
                     profileViewModel = profileViewModel,
                     onNavigateToPractice = { selectTab(1) },
                     onNavigateToQuestionBank = { selectTab(2) },
-                    onNavigateToExam = onNavigateToExam,
+                    onNavigateToExam = { onNavigateToExam(null) },
                     onNavigateToHistory = onNavigateToHistory,
                     onNavigateToProfile = { selectTab(3) },
                     onNavigateToAdmin = onNavigateToAdmin,
@@ -145,7 +145,7 @@ fun MainScreen(
                 1 -> PracticeScreen(viewModel = practiceViewModel)
                 2 -> QuestionBankScreen(
                     viewModel = questionBankViewModel,
-                    onStartExam = { sessionName -> onNavigateToExam() },
+                    onStartExam = { sessionName -> onNavigateToExam(sessionName) },
                 )
                 3 -> ProfileScreen(
                     viewModel = profileViewModel,

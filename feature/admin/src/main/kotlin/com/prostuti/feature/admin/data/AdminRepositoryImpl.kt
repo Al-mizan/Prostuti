@@ -10,7 +10,11 @@ import com.prostuti.core.model.QuestionType
 import com.prostuti.core.model.Role
 import com.prostuti.core.model.Subject
 import com.prostuti.core.model.UpdateQuestionRequest
+import com.prostuti.core.model.CreateModelTestRequest
+import com.prostuti.core.model.ModelTestDto
+import com.prostuti.core.model.UpdateModelTestRequest
 import com.prostuti.core.network.AdminApi
+import com.prostuti.core.network.ModelTestApi
 import com.prostuti.feature.admin.domain.AdminRepository
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
@@ -19,6 +23,7 @@ import kotlinx.serialization.SerializationException
 
 class AdminRepositoryImpl(
     private val api: AdminApi,
+    private val modelTestApi: ModelTestApi,
     private val sessionStore: SessionStore,
 ) : AdminRepository {
 
@@ -114,6 +119,58 @@ class AdminRepositoryImpl(
 
     override suspend fun updateUserRole(id: String, role: Role): Result<AdminUserDto> = try {
         val result = api.updateUserRole(id, role)
+        Result.Success(result)
+    } catch (e: ClientRequestException) {
+        handleClientError(e)
+    } catch (e: ServerResponseException) {
+        Result.Error("Server error: ${e.response.status.value}")
+    } catch (e: SerializationException) {
+        Result.Error("Unexpected response format from server")
+    } catch (e: Exception) {
+        Result.Error(e.message ?: "Network error occurred")
+    }
+
+    override suspend fun getModelTests(): Result<List<ModelTestDto>> = try {
+        val result = modelTestApi.getAllModelTests()
+        Result.Success(result)
+    } catch (e: ClientRequestException) {
+        handleClientError(e)
+    } catch (e: ServerResponseException) {
+        Result.Error("Server error: ${e.response.status.value}")
+    } catch (e: SerializationException) {
+        Result.Error("Unexpected response format from server")
+    } catch (e: Exception) {
+        Result.Error(e.message ?: "Network error occurred")
+    }
+
+    override suspend fun createModelTest(request: CreateModelTestRequest): Result<ModelTestDto> = try {
+        val result = modelTestApi.createModelTest(request)
+        Result.Success(result)
+    } catch (e: ClientRequestException) {
+        handleClientError(e)
+    } catch (e: ServerResponseException) {
+        Result.Error("Server error: ${e.response.status.value}")
+    } catch (e: SerializationException) {
+        Result.Error("Unexpected response format from server")
+    } catch (e: Exception) {
+        Result.Error(e.message ?: "Network error occurred")
+    }
+
+    override suspend fun updateModelTest(id: String, request: UpdateModelTestRequest): Result<ModelTestDto> = try {
+        val result = modelTestApi.updateModelTest(id, request)
+        Result.Success(result)
+    } catch (e: ClientRequestException) {
+        handleClientError(e)
+    } catch (e: ServerResponseException) {
+        Result.Error("Server error: ${e.response.status.value}")
+    } catch (e: SerializationException) {
+        Result.Error("Unexpected response format from server")
+    } catch (e: Exception) {
+        Result.Error(e.message ?: "Network error occurred")
+    }
+
+    override suspend fun deleteModelTest(id: String): Result<Boolean> = try {
+        val result = modelTestApi.deleteModelTest(id)
         Result.Success(result)
     } catch (e: ClientRequestException) {
         handleClientError(e)

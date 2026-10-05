@@ -24,12 +24,13 @@ val examModule = module {
     factory { SubmitExamUseCase(repository = get()) }
     factory { GetLeaderboardUseCase(repository = get()) }
 
-    viewModel {
+    viewModel { params ->
         ExamViewModel(
             getAvailableSessions = get(),
             startExamSession = get(),
             submitExamUseCase = get(),
             getLeaderboardUseCase = get(),
+            initialSessionName = params.getOrNull(),
         )
     }
 }

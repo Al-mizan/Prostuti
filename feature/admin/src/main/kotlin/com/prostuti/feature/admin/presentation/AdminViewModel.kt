@@ -3,12 +3,19 @@ package com.prostuti.feature.admin.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.prostuti.core.common.Result
+import com.prostuti.core.model.CreateModelTestRequest
+import com.prostuti.core.model.ModelTestDto
 import com.prostuti.core.model.Role
+import com.prostuti.core.model.UpdateModelTestRequest
 import com.prostuti.core.model.UpdateQuestionRequest
+import com.prostuti.feature.admin.domain.CreateAdminModelTestUseCase
+import com.prostuti.feature.admin.domain.DeleteAdminModelTestUseCase
 import com.prostuti.feature.admin.domain.DeleteAdminQuestionUseCase
+import com.prostuti.feature.admin.domain.GetAdminModelTestsUseCase
 import com.prostuti.feature.admin.domain.GetAdminQuestionsUseCase
 import com.prostuti.feature.admin.domain.GetAdminUsersUseCase
 import com.prostuti.feature.admin.domain.ImportCsvUseCase
+import com.prostuti.feature.admin.domain.UpdateAdminModelTestUseCase
 import com.prostuti.feature.admin.domain.UpdateAdminQuestionUseCase
 import com.prostuti.feature.admin.domain.UpdateUserRoleUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +31,10 @@ class AdminViewModel(
     private val deleteAdminQuestionUseCase: DeleteAdminQuestionUseCase,
     private val getAdminUsersUseCase: GetAdminUsersUseCase,
     private val updateUserRoleUseCase: UpdateUserRoleUseCase,
+    private val getModelTestsUseCase: GetAdminModelTestsUseCase,
+    private val createModelTestUseCase: CreateAdminModelTestUseCase,
+    private val updateModelTestUseCase: UpdateAdminModelTestUseCase,
+    private val deleteModelTestUseCase: DeleteAdminModelTestUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AdminUiState())
@@ -32,6 +43,7 @@ class AdminViewModel(
     init {
         loadQuestions(page = 0)
         loadUsers()
+        loadModelTests()
     }
 
     fun onEvent(event: AdminUiEvent) {
@@ -41,6 +53,7 @@ class AdminViewModel(
                 when (event.tab) {
                     AdminTab.QUESTIONS -> loadQuestions(_uiState.value.currentPage)
                     AdminTab.USERS -> loadUsers()
+                    AdminTab.MODEL_TESTS -> loadModelTests()
                     AdminTab.CSV_IMPORT -> Unit
                 }
             }
@@ -108,6 +121,27 @@ class AdminViewModel(
             // Users
             is AdminUiEvent.RefreshUsers -> loadUsers()
             is AdminUiEvent.ToggleUserRole -> toggleUserRole(event.userId, event.currentRole)
+
+            // Model Tests Tab Events
+            is AdminUiEvent.RefreshModelTests -> loadModelTests()
+            is AdminUiEvent.OpenCreateModelTestDialog -> {
+                _uiState.update { it.copy(showModelTestDialog = true, editingModelTest = null) }
+            }
+            is AdminUiEvent.OpenEditModelTestDialog -> {
+                _uiState.update { it.copy(showModelTestDialog = true, editingModelTest = event.modelTest) }
+            }
+            is AdminUiEvent.DismissModelTestDialog -> {
+                _uiState.update { it.copy(showModelTestDialog = false, editingModelTest = null) }
+            }
+            is AdminUiEvent.CreateModelTest -> createModelTest(event.request)
+            is AdminUiEvent.UpdateModelTest -> updateModelTest(event.id, event.request)
+            is AdminUiEvent.RequestDeleteModelTest -> {
+                _uiState.update { it.copy(modelTestToDelete = event.modelTest) }
+            }
+            is AdminUiEvent.DismissDeleteModelTestDialog -> {
+                _uiState.update { it.copy(modelTestToDelete = null) }
+            }
+            is AdminUiEvent.ConfirmDeleteModelTest -> confirmDeleteModelTest()
 
             // User Message
             is AdminUiEvent.DismissUserMessage -> {
@@ -282,6 +316,102 @@ class AdminViewModel(
                 is Result.Error -> {
                     _uiState.update {
                         it.copy(userMessage = "রোল পরিবর্তন ব্যর্থ: ${result.message}")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadModelTests() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoadingModelTests = true) }
+            val result = getModelTestsUseCase()
+            when (result) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            modelTests = result.value,
+                            isLoadingModelTests = false,
+                        )
+                    }
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoadingModelTests = false,
+                            userMessage = "মডেল টেস্ট লোড ব্যর্থ: ${result.message}",
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun createModelTest(request: CreateModelTestRequest) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSavingModelTest = true) }
+            val result = createModelTestUseCase(request)
+            _uiState.update { it.copy(isSavingModelTest = false) }
+            when (result) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            showModelTestDialog = false,
+                            userMessage = "মডেল টেস্ট সফলভাবে তৈরি করা হয়েছে",
+                        )
+                    }
+                    loadModelTests()
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(userMessage = "তৈরি ব্যর্থ: ${result.message}")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateModelTest(id: String, request: UpdateModelTestRequest) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSavingModelTest = true) }
+            val result = updateModelTestUseCase(id, request)
+            _uiState.update { it.copy(isSavingModelTest = false) }
+            when (result) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(
+                            showModelTestDialog = false,
+                            editingModelTest = null,
+                            userMessage = "মডেল টেস্ট সফলভাবে আপডেট করা হয়েছে",
+                        )
+                    }
+                    loadModelTests()
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(userMessage = "আপডেট ব্যর্থ: ${result.message}")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun confirmDeleteModelTest() {
+        val toDelete = _uiState.value.modelTestToDelete ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isDeletingModelTest = true) }
+            val result = deleteModelTestUseCase(toDelete.id)
+            _uiState.update { it.copy(isDeletingModelTest = false, modelTestToDelete = null) }
+            when (result) {
+                is Result.Success -> {
+                    _uiState.update {
+                        it.copy(userMessage = "মডেল টেস্ট মুছে ফেলা হয়েছে")
+                    }
+                    loadModelTests()
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(userMessage = "মুছে ফেলা যায়নি: ${result.message}")
                     }
                 }
             }

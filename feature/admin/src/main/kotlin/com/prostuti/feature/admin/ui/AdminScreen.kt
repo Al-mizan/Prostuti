@@ -89,6 +89,7 @@ fun AdminScreen(
                                 AdminTab.CSV_IMPORT -> Unit
                                 AdminTab.QUESTIONS -> viewModel.onEvent(AdminUiEvent.RefreshQuestions)
                                 AdminTab.USERS -> viewModel.onEvent(AdminUiEvent.RefreshUsers)
+                                AdminTab.MODEL_TESTS -> viewModel.onEvent(AdminUiEvent.RefreshModelTests)
                             }
                         }
                     ) {
@@ -128,6 +129,7 @@ fun AdminScreen(
                                     AdminTab.CSV_IMPORT -> Icons.Default.CloudUpload
                                     AdminTab.QUESTIONS -> Icons.Default.Quiz
                                     AdminTab.USERS -> Icons.Default.People
+                                    AdminTab.MODEL_TESTS -> Icons.Default.Timer
                                 },
                                 contentDescription = tab.title,
                             )
@@ -152,6 +154,10 @@ fun AdminScreen(
                         onEvent = viewModel::onEvent,
                     )
                     AdminTab.USERS -> UsersTab(
+                        uiState = uiState,
+                        onEvent = viewModel::onEvent,
+                    )
+                    AdminTab.MODEL_TESTS -> ModelTestsTab(
                         uiState = uiState,
                         onEvent = viewModel::onEvent,
                     )
@@ -205,6 +211,54 @@ fun AdminScreen(
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.onEvent(AdminUiEvent.DismissDeleteQuestionDialog) }) {
+                    Text("বাতিল")
+                }
+            }
+        )
+    }
+
+    // Model Test Create / Edit Dialog
+    if (uiState.showModelTestDialog) {
+        ModelTestFormDialog(
+            editingModelTest = uiState.editingModelTest,
+            isSaving = uiState.isSavingModelTest,
+            onDismiss = { viewModel.onEvent(AdminUiEvent.DismissModelTestDialog) },
+            onSaveCreate = { req -> viewModel.onEvent(AdminUiEvent.CreateModelTest(req)) },
+            onSaveUpdate = { id, req -> viewModel.onEvent(AdminUiEvent.UpdateModelTest(id, req)) },
+        )
+    }
+
+    // Model Test Delete Confirmation Dialog
+    val modelTestToDelete = uiState.modelTestToDelete
+    if (modelTestToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { viewModel.onEvent(AdminUiEvent.DismissDeleteModelTestDialog) },
+            title = { Text("মডেল টেস্ট মুছে ফেলবেন?", fontWeight = FontWeight.Bold) },
+            text = {
+                Text(
+                    text = "আপনি কি নিশ্চিত যে \"${modelTestToDelete.title}\" মডেল টেস্টটি সম্পূর্ণ মুছে ফেলতে চান?",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = { viewModel.onEvent(AdminUiEvent.ConfirmDeleteModelTest) },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    enabled = !uiState.isDeletingModelTest,
+                ) {
+                    if (uiState.isDeletingModelTest) {
+                        CircularProgressIndicator(
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(16.dp),
+                            color = MaterialTheme.colorScheme.onError,
+                        )
+                    } else {
+                        Text("মুছে ফেলুন")
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { viewModel.onEvent(AdminUiEvent.DismissDeleteModelTestDialog) }) {
                     Text("বাতিল")
                 }
             }
@@ -1116,6 +1170,333 @@ private fun EditQuestionDialog(
                 Text("বাতিল")
             }
         },
+    )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TAB 4: MODEL TESTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun ModelTestsTab(
+    uiState: AdminUiState,
+    onEvent: (AdminUiEvent) -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+    ) {
+        // Top Action Bar
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "বিসিএস মডেল টেস্ট ব্যবস্থাপনা",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = "লাইভ, আসন্ন ও আর্কাইভ মডেল টেস্ট কনফিগারেশন",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            Button(
+                onClick = { onEvent(AdminUiEvent.OpenCreateModelTestDialog) },
+                shape = RoundedCornerShape(12.dp),
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("নতুন টেস্ট", fontWeight = FontWeight.Bold)
+            }
+        }
+
+        Spacer(Modifier.height(14.dp))
+
+        if (uiState.isLoadingModelTests) {
+            Box(
+                modifier = Modifier.fillMaxSize().weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (uiState.modelTests.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize().weight(1f),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Timer,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    )
+                    Text(
+                        text = "কোনো মডেল টেস্ট পাওয়া যায়নি",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().weight(1f),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                items(uiState.modelTests) { test ->
+                    ProstutiCard {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = test.title,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.weight(1f),
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                val (statusText, statusBg, statusFg) = when (test.status) {
+                                    ModelTestStatus.LIVE -> Triple("চলমান", Color(0xFFDC2626), Color.White)
+                                    ModelTestStatus.UPCOMING -> Triple("আসন্ন", Color(0xFF0284C7), Color.White)
+                                    ModelTestStatus.EXPIRED -> Triple("সমাপ্ত", Color(0xFF6B7280), Color.White)
+                                }
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = statusBg,
+                                ) {
+                                    Text(
+                                        text = statusText,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = statusFg,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                    )
+                                }
+                            }
+
+                            val desc = test.description
+                            if (!desc.isNullOrBlank()) {
+                                Text(
+                                    text = desc,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+
+                            // Metadata pills
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant,
+                                ) {
+                                    Text(
+                                        text = "🏷 ${test.examSession}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    )
+                                }
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant,
+                                ) {
+                                    Text(
+                                        text = "⏱ ${test.durationMinutes} মি.",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    )
+                                }
+                                Surface(
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = MaterialTheme.colorScheme.surfaceVariant,
+                                ) {
+                                    Text(
+                                        text = "❓ ${test.totalQuestions} প্রশ্ন",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    )
+                                }
+                            }
+
+                            // Actions
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.End,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                IconButton(onClick = { onEvent(AdminUiEvent.OpenEditModelTestDialog(test)) }) {
+                                    Icon(Icons.Default.Edit, contentDescription = "সম্পাদনা", tint = MaterialTheme.colorScheme.primary)
+                                }
+                                IconButton(onClick = { onEvent(AdminUiEvent.RequestDeleteModelTest(test)) }) {
+                                    Icon(Icons.Default.Delete, contentDescription = "মুছুন", tint = MaterialTheme.colorScheme.error)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModelTestFormDialog(
+    editingModelTest: ModelTestDto?,
+    isSaving: Boolean,
+    onDismiss: () -> Unit,
+    onSaveCreate: (CreateModelTestRequest) -> Unit,
+    onSaveUpdate: (String, UpdateModelTestRequest) -> Unit,
+) {
+    var title by remember { mutableStateOf(editingModelTest?.title ?: "") }
+    var description by remember { mutableStateOf(editingModelTest?.description ?: "") }
+    var examSession by remember { mutableStateOf(editingModelTest?.examSession ?: "") }
+    var durationMinutesText by remember { mutableStateOf(editingModelTest?.durationMinutes?.toString() ?: "120") }
+    var totalQuestionsText by remember { mutableStateOf(editingModelTest?.totalQuestions?.toString() ?: "200") }
+    var totalMarksText by remember { mutableStateOf(editingModelTest?.totalMarks?.toString() ?: "200.0") }
+    var startTime by remember { mutableStateOf(editingModelTest?.startTime ?: java.time.Instant.now().toString()) }
+    var endTime by remember { mutableStateOf(editingModelTest?.endTime ?: java.time.Instant.now().plus(java.time.Duration.ofDays(15)).toString()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = if (editingModelTest != null) "মডেল টেস্ট সম্পাদনা করুন" else "নতুন লাইভ মডেল টেস্ট তৈরি করুন",
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("মডেল টেস্ট শিরোনাম *") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("সংক্ষিপ্ত বিবরণ") },
+                    maxLines = 3,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = examSession,
+                    onValueChange = { examSession = it },
+                    label = { Text("পরীক্ষার সেশন ট্যাগ (examSession) *") },
+                    placeholder = { Text("e.g. 47th BCS Special Model Test") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    OutlinedTextField(
+                        value = durationMinutesText,
+                        onValueChange = { durationMinutesText = it },
+                        label = { Text("সময় (মিনিট)") },
+                        modifier = Modifier.weight(1f),
+                    )
+                    OutlinedTextField(
+                        value = totalQuestionsText,
+                        onValueChange = { totalQuestionsText = it },
+                        label = { Text("প্রশ্ন সংখ্যা") },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+                OutlinedTextField(
+                    value = startTime,
+                    onValueChange = { startTime = it },
+                    label = { Text("শুরুর সময় (ISO format) *") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = endTime,
+                    onValueChange = { endTime = it },
+                    label = { Text("শেষের সময় (ISO format) *") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val duration = durationMinutesText.toIntOrNull() ?: 120
+                    val totalQ = totalQuestionsText.toIntOrNull() ?: 200
+                    val marks = totalMarksText.toDoubleOrNull() ?: 200.0
+                    if (editingModelTest != null) {
+                        onSaveUpdate(
+                            editingModelTest.id,
+                            UpdateModelTestRequest(
+                                title = title.trim(),
+                                description = description.trim().ifBlank { null },
+                                examSession = examSession.trim(),
+                                durationMinutes = duration,
+                                totalMarks = marks,
+                                totalQuestions = totalQ,
+                                startTime = startTime.trim(),
+                                endTime = endTime.trim(),
+                            )
+                        )
+                    } else {
+                        onSaveCreate(
+                            CreateModelTestRequest(
+                                title = title.trim(),
+                                description = description.trim().ifBlank { null },
+                                examSession = examSession.trim(),
+                                durationMinutes = duration,
+                                totalMarks = marks,
+                                totalQuestions = totalQ,
+                                startTime = startTime.trim(),
+                                endTime = endTime.trim(),
+                            )
+                        )
+                    }
+                },
+                enabled = !isSaving && title.isNotBlank() && examSession.isNotBlank() && startTime.isNotBlank() && endTime.isNotBlank(),
+            ) {
+                if (isSaving) {
+                    CircularProgressIndicator(
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(16.dp),
+                    )
+                } else {
+                    Text("সংরক্ষণ করুন")
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("বাতিল")
+            }
+        }
     )
 }
 

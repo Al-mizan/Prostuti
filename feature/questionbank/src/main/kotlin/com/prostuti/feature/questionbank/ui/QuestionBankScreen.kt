@@ -31,13 +31,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.EventNote
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -47,6 +52,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -54,9 +60,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import com.prostuti.core.model.ModelTestDto
+import com.prostuti.core.model.ModelTestStatus
 import com.prostuti.feature.questionbank.presentation.QuestionBankView
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -151,9 +160,13 @@ fun QuestionBankScreen(
                     when (state.view) {
                         QuestionBankView.HOME -> {
                             QuestionBankHomeScreen(
-                                onJoinLiveExam = { onStartExam(null) },
+                                state = state,
+                                onJoinLiveExam = { sessionName -> onStartExam(sessionName) },
                                 onOpenBcsSessions = {
                                     viewModel.onEvent(QuestionBankUiEvent.NavigateView(QuestionBankView.BCS_SESSIONS))
+                                },
+                                onOpenModelTests = {
+                                    viewModel.onEvent(QuestionBankUiEvent.NavigateView(QuestionBankView.MODEL_TESTS))
                                 },
                                 onOpenSubject = { subject ->
                                     viewModel.onEvent(QuestionBankUiEvent.OpenSubjectStudy(subject))
@@ -186,6 +199,17 @@ fun QuestionBankScreen(
                                 },
                             )
                         }
+
+                        QuestionBankView.MODEL_TESTS -> {
+                            ModelTestCatalogScreen(
+                                state = state,
+                                onEvent = viewModel::onEvent,
+                                onStartExam = { sessionName -> onStartExam(sessionName) },
+                                onBack = {
+                                    viewModel.onEvent(QuestionBankUiEvent.NavigateView(QuestionBankView.HOME))
+                                },
+                            )
+                        }
                     }
 
                     // Chorcha-style Exam Action Modal
@@ -209,8 +233,10 @@ fun QuestionBankScreen(
 
 @Composable
 private fun QuestionBankHomeScreen(
-    onJoinLiveExam: () -> Unit,
+    state: QuestionBankUiState.Success,
+    onJoinLiveExam: (String) -> Unit,
     onOpenBcsSessions: () -> Unit,
+    onOpenModelTests: () -> Unit,
     onOpenSubject: (Subject) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -238,9 +264,13 @@ private fun QuestionBankHomeScreen(
         }
 
         // 1. Live Model Test Banner
-        LiveModelTestBannerCard(onJoinExam = onJoinLiveExam)
+        LiveModelTestBannerCard(
+            liveTest = state.liveModelTest,
+            onJoinExam = onJoinLiveExam,
+            onBrowseAll = onOpenModelTests,
+        )
 
-        // 2. Institute BCS Preliminary Archive Card
+        // 2. Institute BCS & Model Test Cards
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
                 text = "প্রতিষ্ঠান ভিত্তিক প্রশ্ন ব্যাংক",
@@ -249,6 +279,7 @@ private fun QuestionBankHomeScreen(
                 color = MaterialTheme.colorScheme.onBackground,
             )
             InstituteBcsCard(onClick = onOpenBcsSessions)
+            InstituteModelTestCard(onClick = onOpenModelTests)
         }
 
         // 3. Subject-wise Grid (9 BCS Subjects)
@@ -873,6 +904,350 @@ private fun PaginationBar(
                     contentDescription = "Next Page",
                     modifier = Modifier.size(16.dp),
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModelTestCatalogScreen(
+    state: QuestionBankUiState.Success,
+    onEvent: (QuestionBankUiEvent) -> Unit,
+    onStartExam: (String) -> Unit,
+    onBack: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+    ) {
+        // Sticky Header / Filter Bar
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 2.dp,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back",
+                            )
+                        }
+                        Column {
+                            Text(
+                                text = "বিসিএস মডেল টেস্ট",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                            Text(
+                                text = "লাইভ, আসন্ন ও বিগত আর্কাইভ পরীক্ষা",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+
+                    IconButton(onClick = { onEvent(QuestionBankUiEvent.RefreshModelTests) }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh",
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                // Search Bar
+                OutlinedTextField(
+                    value = state.searchQuery,
+                    onValueChange = { onEvent(QuestionBankUiEvent.UpdateSearchQuery(it)) },
+                    placeholder = { Text("মডেল টেস্ট খুঁজুন (শিরোনাম বা সেশন)...") },
+                    leadingIcon = {
+                        Icon(Icons.Default.Search, contentDescription = null)
+                    },
+                    trailingIcon = {
+                        if (state.searchQuery.isNotBlank()) {
+                            IconButton(onClick = { onEvent(QuestionBankUiEvent.UpdateSearchQuery("")) }) {
+                                Icon(Icons.Default.Close, contentDescription = "Clear")
+                            }
+                        }
+                    },
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                // Filter Chips
+                val filterScrollState = rememberScrollState()
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(filterScrollState),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    FilterChip(
+                        selected = state.selectedModelTestFilter == null,
+                        onClick = { onEvent(QuestionBankUiEvent.FilterModelTests(null)) },
+                        label = { Text("সব পরীক্ষা") },
+                        shape = RoundedCornerShape(50),
+                    )
+                    FilterChip(
+                        selected = state.selectedModelTestFilter == ModelTestStatus.LIVE,
+                        onClick = { onEvent(QuestionBankUiEvent.FilterModelTests(ModelTestStatus.LIVE)) },
+                        label = { Text("চলমান লাইভ") },
+                        shape = RoundedCornerShape(50),
+                    )
+                    FilterChip(
+                        selected = state.selectedModelTestFilter == ModelTestStatus.UPCOMING,
+                        onClick = { onEvent(QuestionBankUiEvent.FilterModelTests(ModelTestStatus.UPCOMING)) },
+                        label = { Text("আসন্ন পরীক্ষা") },
+                        shape = RoundedCornerShape(50),
+                    )
+                    FilterChip(
+                        selected = state.selectedModelTestFilter == ModelTestStatus.EXPIRED,
+                        onClick = { onEvent(QuestionBankUiEvent.FilterModelTests(ModelTestStatus.EXPIRED)) },
+                        label = { Text("আর্কাইভ / সমাপ্ত") },
+                        shape = RoundedCornerShape(50),
+                    )
+                }
+            }
+        }
+
+        // Test Cards List
+        val tests = state.filteredModelTests
+        if (tests.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.EventNote,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(56.dp),
+                    )
+                    Text(
+                        text = "কোনো মডেল টেস্ট পাওয়া যায়নি",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        text = "ফিল্টার পরিবর্তন করে অথবা নতুন পরীক্ষার জন্য অপেক্ষা করুন।",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                items(tests, key = { it.id }) { test ->
+                    ModelTestCatalogItemCard(
+                        test = test,
+                        onTakeExam = { onStartExam(test.examSession) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ModelTestCatalogItemCard(
+    test: ModelTestDto,
+    onTakeExam: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val isLive = test.status == ModelTestStatus.LIVE
+    val isUpcoming = test.status == ModelTestStatus.UPCOMING
+
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(
+            1.dp,
+            if (isLive) Color(0xFFDC2626).copy(alpha = 0.4f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isLive) 3.dp else 1.dp),
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            // Header: Status Badge & Session
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = when {
+                        isLive -> Color(0xFFDC2626)
+                        isUpcoming -> Color(0xFF2563EB)
+                        else -> MaterialTheme.colorScheme.surfaceVariant
+                    },
+                ) {
+                    Text(
+                        text = when {
+                            isLive -> "চলমান লাইভ"
+                            isUpcoming -> "আসন্ন"
+                            else -> "আর্কাইভ / সমাপ্ত"
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = when {
+                            isLive || isUpcoming -> Color.White
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    )
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                ) {
+                    Text(
+                        text = test.examSession,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            Text(
+                text = test.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+
+            val description = test.description
+            if (!description.isNullOrBlank()) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            Spacer(Modifier.height(14.dp))
+
+            // Metadata Row: Duration, Questions, Marks
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Timer,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp),
+                    )
+                    Text(
+                        text = "${test.durationMinutes.toBanglaDigits()} মিনিট",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.HelpOutline,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp),
+                    )
+                    Text(
+                        text = "${test.totalQuestions.toBanglaDigits()} প্রশ্ন • ${test.totalMarks.toInt().toBanglaDigits()} নম্বর",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // CTA Button
+            if (isUpcoming) {
+                OutlinedButton(
+                    onClick = {},
+                    enabled = false,
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccessTime,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = "শীঘ্রই শুরু হবে (অপেক্ষমান)",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+            } else {
+                Button(
+                    onClick = onTakeExam,
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isLive) Color(0xFFDC2626) else MaterialTheme.colorScheme.primary,
+                        contentColor = Color.White,
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = if (isLive) "লাইভ পরীক্ষায় অংশ নিন" else "আর্কাইভ পরীক্ষা দিন",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
             }
         }
     }

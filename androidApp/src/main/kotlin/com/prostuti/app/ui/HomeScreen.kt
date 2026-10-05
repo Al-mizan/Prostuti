@@ -259,20 +259,21 @@ fun HomeScreen(
                                 text = "${toBanglaDigits(stats.streakDays)} দিনের ধারাবাহিকতা",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF7C2D12),
+                                color = Color(0xFF431407),
                             )
                             Text(
                                 text = "প্রতিদিনের অনুশীলনে সক্রিয় থাকুন",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color(0xFF9A3412),
+                                color = Color(0xFF7C2D12),
                             )
                         }
                     }
 
                     Surface(
                         shape = RoundedCornerShape(50),
-                        color = Color(0xFFFEF3C7),
-                        contentColor = Color(0xFFB45309),
+                        color = Color(0xFFFED7AA).copy(alpha = 0.6f),
+                        contentColor = Color(0xFF7C2D12),
+                        border = BorderStroke(1.dp, Color(0xFFFDBA74).copy(alpha = 0.6f)),
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -282,12 +283,14 @@ fun HomeScreen(
                                 Icons.Default.Star,
                                 contentDescription = null,
                                 modifier = Modifier.size(15.dp),
+                                tint = Color(0xFFC2410C),
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
                                 text = "+${toBanglaDigits(stats.totalXp)} XP",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
+                                color = Color(0xFF7C2D12),
                             )
                         }
                     }
@@ -403,7 +406,7 @@ fun HomeScreen(
 
         // History & Wrong Answers Card
         DashboardActionCard(
-            title = "পরীক্ষার ইতিহাস ও রিভিশন",
+            title = "ইতিহাস ও রিভিশন",
             subtitle = "বিগত ফলাফল এবং ভুল উত্তরসমূহ রিভিশন ডেক",
             badgeText = "রিভিশন",
             icon = Icons.Default.History,

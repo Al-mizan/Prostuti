@@ -1,5 +1,11 @@
 package com.prostuti.feature.questionbank.ui
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,6 +28,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.EventNote
+import androidx.compose.material.icons.automirrored.filled.FactCheck
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AccessTime
@@ -29,7 +37,6 @@ import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Computer
-import androidx.compose.material.icons.filled.FactCheck
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocalFireDepartment
@@ -48,16 +55,21 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.prostuti.core.designsystem.UnifiedSubjectCard
+import com.prostuti.core.model.ModelTestDto
+import com.prostuti.core.model.ModelTestStatus
 import com.prostuti.core.model.Subject
 
 /**
@@ -179,13 +191,154 @@ val BcsSubjectCards = listOf(
 )
 
 /**
- * 15–30 day featured Live Model Test card with countdown and 1-attempt badge.
+ * Dynamic Live Model Test Banner with live pulsing indicator dot,
+ * countdown, high-contrast WCAG AA text, and single-click CTA.
+ * If liveTest == null, renders a sleek fallback banner.
  */
 @Composable
 fun LiveModelTestBannerCard(
-    onJoinExam: () -> Unit,
+    liveTest: ModelTestDto?,
+    onJoinExam: (sessionName: String) -> Unit,
+    onBrowseAll: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (liveTest == null) {
+        // Fallback banner when no live test is active
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF1E293B), // Slate deep
+                            Color(0xFF0F172A),
+                            Color(0xFF020617),
+                        )
+                    )
+                ),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color.White.copy(alpha = 0.15f),
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.EventNote,
+                                contentDescription = null,
+                                tint = Color(0xFF94A3B8),
+                                modifier = Modifier.size(14.dp),
+                            )
+                            Text(
+                                text = "মডেল টেস্ট আপডেট",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFE2E8F0),
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(14.dp))
+
+                Text(
+                    text = "কোনো লাইভ মডেল টেস্ট চলমান নেই",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                )
+
+                Spacer(Modifier.height(6.dp))
+
+                Text(
+                    text = "আসন্ন পরীক্ষার সময়সূচী বা পূর্বের আর্কাইভ মডেল টেস্টগুলোতে অংশ নিতে ক্যাটালগ ব্রাউজ করুন।",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFFCBD5E1),
+                )
+
+                Spacer(Modifier.height(18.dp))
+
+                Button(
+                    onClick = onBrowseAll,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = Color.White,
+                    ),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = "সকল মডেল টেস্ট ব্রাউজ করুন",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                }
+            }
+        }
+        return
+    }
+
+    // Active live or upcoming model test banner
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.35f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "pulseAlpha",
+    )
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 0.85f,
+        targetValue = 1.25f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "pulseScale",
+    )
+
+    val isLive = liveTest.status == ModelTestStatus.LIVE
+    val isUpcoming = liveTest.status == ModelTestStatus.UPCOMING
+
+    val gradientColors = when {
+        isLive -> listOf(Color(0xFF881337), Color(0xFF4C0519), Color(0xFF1E0108))
+        isUpcoming -> listOf(Color(0xFF1E3A8A), Color(0xFF172554), Color(0xFF0F172A))
+        else -> listOf(Color(0xFF334155), Color(0xFF1E293B), Color(0xFF0F172A))
+    }
+
+    val countdownText = if (isLive) {
+        formatCountdown(liveTest.endTime, isLive = true)
+    } else if (isUpcoming) {
+        formatCountdown(liveTest.startTime, isLive = false)
+    } else {
+        "সমাপ্ত"
+    }
+
     Card(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
@@ -193,15 +346,7 @@ fun LiveModelTestBannerCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFF881337), // Crimson deep
-                        Color(0xFF4C0519),
-                        Color(0xFF1E0108),
-                    )
-                )
-            ),
+            .background(Brush.linearGradient(colors = gradientColors)),
     ) {
         Column(
             modifier = Modifier
@@ -216,21 +361,43 @@ fun LiveModelTestBannerCard(
             ) {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFDC2626),
+                    color = when {
+                        isLive -> Color(0xFFDC2626)
+                        isUpcoming -> Color(0xFF2563EB)
+                        else -> Color(0xFF475569)
+                    },
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.LocalFireDepartment,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(14.dp),
-                        )
+                        if (isLive) {
+                            // Pulsing dot
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .graphicsLayer {
+                                        scaleX = pulseScale
+                                        scaleY = pulseScale
+                                        alpha = pulseAlpha
+                                    }
+                                    .background(Color.White, CircleShape)
+                            )
+                        } else {
+                            Icon(
+                                imageVector = if (isUpcoming) Icons.Default.AccessTime else Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(13.dp),
+                            )
+                        }
                         Text(
-                            text = "লাইভ মডেল টেস্ট • চলমান",
+                            text = when {
+                                isLive -> "লাইভ পরীক্ষা চলমান"
+                                isUpcoming -> "আসন্ন পরীক্ষা"
+                                else -> "আর্কাইভ পরীক্ষা"
+                            },
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
@@ -240,22 +407,33 @@ fun LiveModelTestBannerCard(
 
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = Color.White.copy(alpha = 0.15f),
+                    color = Color.White.copy(alpha = 0.18f),
                 ) {
-                    Text(
-                        text = "১ বার অংশগ্রহণ যোগ্য",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White.copy(alpha = 0.9f),
+                    Row(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    )
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Timer,
+                            contentDescription = null,
+                            tint = Color(0xFFFDE047),
+                            modifier = Modifier.size(13.dp),
+                        )
+                        Text(
+                            text = countdownText,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                        )
+                    }
                 }
             }
 
             Spacer(Modifier.height(14.dp))
 
             Text(
-                text = "৪৭তম বিসিএস বিশেষ লাইভ মডেল টেস্ট",
+                text = liveTest.title,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -264,9 +442,10 @@ fun LiveModelTestBannerCard(
             Spacer(Modifier.height(4.dp))
 
             Text(
-                text = "১৫ দিনব্যাপী চলবে • পূর্ণাঙ্গ সিলেবাস • রিয়েল-টাইম ফলাফল ও ব্যাখ্যা",
+                text = liveTest.description?.takeIf { it.isNotBlank() }
+                    ?: "${liveTest.examSession} • পূর্ণাঙ্গ সিলেবাস • রিয়েল-টাইম ফলাফল ও ব্যাখ্যা",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.8f),
+                color = Color(0xFFF1F5F9),
             )
 
             Spacer(Modifier.height(16.dp))
@@ -288,7 +467,7 @@ fun LiveModelTestBannerCard(
                         modifier = Modifier.size(16.dp),
                     )
                     Text(
-                        text = "১২০ মিনিট",
+                        text = "${liveTest.durationMinutes.toBanglaDigits()} মিনিট",
                         style = MaterialTheme.typography.labelMedium,
                         color = Color.White,
                         fontWeight = FontWeight.SemiBold,
@@ -306,7 +485,7 @@ fun LiveModelTestBannerCard(
                         modifier = Modifier.size(16.dp),
                     )
                     Text(
-                        text = "২০০ প্রশ্ন • ২০০ নম্বর",
+                        text = "${liveTest.totalQuestions.toBanglaDigits()} প্রশ্ন • ${liveTest.totalMarks.toInt().toBanglaDigits()} নম্বর",
                         style = MaterialTheme.typography.labelMedium,
                         color = Color.White,
                         fontWeight = FontWeight.SemiBold,
@@ -317,16 +496,22 @@ fun LiveModelTestBannerCard(
             Spacer(Modifier.height(18.dp))
 
             Button(
-                onClick = onJoinExam,
+                onClick = {
+                    if (isLive) {
+                        onJoinExam(liveTest.examSession)
+                    } else {
+                        onBrowseAll()
+                    }
+                },
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFE11D48),
+                    containerColor = if (isLive) Color(0xFFE11D48) else MaterialTheme.colorScheme.primary,
                     contentColor = Color.White,
                 ),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    text = "পরীক্ষায় অংশগ্রহণ করুন",
+                    text = if (isLive) "পরীক্ষায় অংশগ্রহণ করুন" else "বিস্তারিত ও সূচি দেখুন",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
                 )
@@ -339,6 +524,129 @@ fun LiveModelTestBannerCard(
             }
         }
     }
+}
+
+/**
+ * Institute Model Test Card taking student to the BCS Model Test catalog/archive.
+ */
+@Composable
+fun InstituteModelTestCard(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.weight(1f),
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = Color(0xFFEFF6FF),
+                    modifier = Modifier.size(52.dp),
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize(),
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.FactCheck,
+                            contentDescription = null,
+                            tint = Color(0xFF2563EB),
+                            modifier = Modifier.size(28.dp),
+                        )
+                    }
+                }
+
+                Column {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(
+                            text = "বিসিএস মডেল টেস্ট",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = Color(0xFFDC2626).copy(alpha = 0.12f),
+                        ) {
+                            Text(
+                                text = "লাইভ ও আর্কাইভ",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFDC2626),
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(4.dp))
+
+                    Text(
+                        text = "সকল লাইভ, আসন্ন ও বিগত আর্কাইভ মডেল টেস্ট",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = "Open model tests",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp),
+            )
+        }
+    }
+}
+
+private fun formatCountdown(isoTime: String, isLive: Boolean): String {
+    return try {
+        val targetMillis = java.time.Instant.parse(isoTime).toEpochMilli()
+        val nowMillis = System.currentTimeMillis()
+        val diffMillis = targetMillis - nowMillis
+        if (diffMillis <= 0) return if (isLive) "সময় সমাপ্ত" else "চলমান"
+        val hours = diffMillis / (1000 * 60 * 60)
+        val minutes = (diffMillis / (1000 * 60)) % 60
+        val days = hours / 24
+        if (days > 0) {
+            val remHours = hours % 24
+            if (isLive) "${days.toInt().toBanglaDigits()} দিন ${remHours.toInt().toBanglaDigits()} ঘণ্টা বাকি"
+            else "${days.toInt().toBanglaDigits()} দিন পর শুরু"
+        } else if (hours > 0) {
+            if (isLive) "${hours.toInt().toBanglaDigits()} ঘণ্টা ${minutes.toInt().toBanglaDigits()} মিনিট বাকি"
+            else "${hours.toInt().toBanglaDigits()} ঘণ্টা পর শুরু"
+        } else {
+            if (isLive) "${minutes.toInt().toBanglaDigits()} মিনিট বাকি"
+            else "${minutes.toInt().toBanglaDigits()} মিনিট পর শুরু"
+        }
+    } catch (_: Exception) {
+        if (isLive) "চলমান" else "আসন্ন"
+    }
+}
+
+private fun Int.toBanglaDigits(): String {
+    val banglaDigits = arrayOf('০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯')
+    return this.toString().map { if (it in '0'..'9') banglaDigits[it - '0'] else it }.joinToString("")
 }
 
 /**
@@ -446,16 +754,21 @@ fun SubjectCardsGrid(
     val rows = BcsSubjectCards.chunked(2)
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         rows.forEach { rowCards ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 rowCards.forEach { card ->
-                    ModernSubjectCard(
-                        card = card,
+                    UnifiedSubjectCard(
+                        title = card.titleBangla,
+                        marks = card.marksBangla,
+                        icon = card.icon,
+                        accentColor = card.accentColor,
+                        containerColor = card.containerColor,
+                        subtitle = card.subtitleBangla,
                         onClick = { onSubjectClick(card.subject) },
                         modifier = Modifier.weight(1f),
                     )
@@ -474,78 +787,14 @@ fun ModernSubjectCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        shape = RoundedCornerShape(16.dp),
-        color = card.containerColor,
-        border = BorderStroke(1.dp, card.accentColor.copy(alpha = 0.22f)),
-        shadowElevation = 1.dp,
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick),
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = card.accentColor.copy(alpha = 0.14f),
-                    modifier = Modifier.size(36.dp),
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            imageVector = card.icon,
-                            contentDescription = null,
-                            tint = card.accentColor,
-                            modifier = Modifier.size(20.dp),
-                        )
-                    }
-                }
-
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = card.accentColor.copy(alpha = 0.12f),
-                ) {
-                    Text(
-                        text = card.marksBangla,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = card.accentColor,
-                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(10.dp))
-
-            Text(
-                text = card.titleBangla,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                lineHeight = 18.sp,
-            )
-
-            Spacer(Modifier.height(4.dp))
-
-            Text(
-                text = card.subtitleBangla,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-    }
+    UnifiedSubjectCard(
+        title = card.titleBangla,
+        marks = card.marksBangla,
+        icon = card.icon,
+        accentColor = card.accentColor,
+        containerColor = card.containerColor,
+        subtitle = card.subtitleBangla,
+        onClick = onClick,
+        modifier = modifier,
+    )
 }

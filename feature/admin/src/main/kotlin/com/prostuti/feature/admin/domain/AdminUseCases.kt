@@ -58,3 +58,22 @@ class UpdateUserRoleUseCase(private val repository: AdminRepository) {
         newRole: Role,
     ): Result<AdminUserDto> = repository.updateUserRole(userId, newRole)
 }
+
+class GetAdminModelTestsUseCase(private val repository: AdminRepository) {
+    suspend operator fun invoke(): Result<List<com.prostuti.core.model.ModelTestDto>> = repository.getModelTests()
+}
+
+class CreateAdminModelTestUseCase(private val repository: AdminRepository) {
+    suspend operator fun invoke(request: com.prostuti.core.model.CreateModelTestRequest): Result<com.prostuti.core.model.ModelTestDto> =
+        repository.createModelTest(request)
+}
+
+class UpdateAdminModelTestUseCase(private val repository: AdminRepository) {
+    suspend operator fun invoke(id: String, request: com.prostuti.core.model.UpdateModelTestRequest): Result<com.prostuti.core.model.ModelTestDto> =
+        repository.updateModelTest(id, request)
+}
+
+class DeleteAdminModelTestUseCase(private val repository: AdminRepository) {
+    suspend operator fun invoke(id: String): Result<Boolean> = repository.deleteModelTest(id)
+}
+
