@@ -7,7 +7,7 @@ import com.prostuti.feature.exam.domain.GetLeaderboardUseCase
 import com.prostuti.feature.exam.domain.StartExamSessionUseCase
 import com.prostuti.feature.exam.domain.SubmitExamUseCase
 import com.prostuti.feature.exam.presentation.ExamViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val examModule = module {

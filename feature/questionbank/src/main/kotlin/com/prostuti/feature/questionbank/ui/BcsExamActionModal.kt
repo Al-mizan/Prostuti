@@ -18,13 +18,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.Rule
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Quiz
-import androidx.compose.material.icons.filled.Rule
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -148,7 +148,7 @@ fun BcsExamActionModal(
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
                         RuleGridItem(
-                            icon = Icons.Default.Rule,
+                            icon = Icons.AutoMirrored.Filled.Rule,
                             iconTint = Color(0xFF059669),
                             label = "পূর্ণমান",
                             value = "${session.totalMarks.toInt().toBanglaDigits()} নম্বর",

@@ -10,6 +10,7 @@ kotlin {
         namespace = "com.prostuti.core.model"
         compileSdk = 36
         minSdk = 24
+        withHostTest {}
     }
 
     sourceSets {
