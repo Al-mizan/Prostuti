@@ -1,6 +1,6 @@
 # Chorcha.net to Prostuti KMP — UX & Design Mapping
 
-This document specifies how **Chorcha** ([chorcha.net](https://chorcha.net/)) UI patterns and product flows are adapted into **Prostuti's Android Jetpack Compose** architecture while strictly adhering to [`docs/project_guide.md`](file:///home/almizan/Other%20Locations/workspace/Projects/App/KMP/Prostuti/docs/project_guide.md) and [`docs/backend_design.md`](file:///home/almizan/Other%20Locations/workspace/Projects/App/KMP/Prostuti/docs/backend_design.md).
+This document specifies how **Chorcha** ([chorcha.net](https://chorcha.net/)) UI patterns and product flows are adapted into **Prostuti's Android Jetpack Compose** architecture while strictly adhering to [`docs/project_guide.md`](file:///home/almizan/Other%20Locations/workspace/Projects/hobby/prostuti/prostuti_app/app/docs/project_guide.md) and [`docs/backend_design.md`](file:///home/almizan/Other%20Locations/workspace/Projects/hobby/prostuti/prostuti_app/backend/docs/backend_design.md).
 
 ---
 

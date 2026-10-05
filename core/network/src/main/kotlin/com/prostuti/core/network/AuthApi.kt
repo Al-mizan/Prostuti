@@ -1,5 +1,6 @@
 package com.prostuti.core.network
 
+import com.prostuti.core.model.ApiResponse
 import com.prostuti.core.model.AuthResponse
 import com.prostuti.core.model.BootstrapAdminRequest
 import com.prostuti.core.model.GoogleAuthRequest
@@ -22,31 +23,52 @@ import io.ktor.http.*
  */
 class AuthApi(private val client: HttpClient) {
 
-    suspend fun register(name: String, email: String, password: String): AuthResponse =
-        client.post("api/v1/auth/register") {
+    suspend fun register(name: String, email: String, password: String): AuthResponse {
+        val response = client.post("api/v1/auth/register") {
             setBody(RegisterRequest(name, email, password))
-        }.body()
+        }
+        val envelope = response.body<ApiResponse<AuthResponse>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
+    }
 
-    suspend fun login(email: String, password: String): AuthResponse =
-        client.post("api/v1/auth/login") {
+    suspend fun login(email: String, password: String): AuthResponse {
+        val response = client.post("api/v1/auth/login") {
             setBody(LoginRequest(email, password))
-        }.body()
+        }
+        val envelope = response.body<ApiResponse<AuthResponse>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
+    }
 
-    suspend fun loginWithGoogle(idToken: String): AuthResponse =
-        client.post("api/v1/auth/google") {
+    suspend fun loginWithGoogle(idToken: String): AuthResponse {
+        val response = client.post("api/v1/auth/google") {
             setBody(GoogleAuthRequest(idToken))
-        }.body()
+        }
+        val envelope = response.body<ApiResponse<AuthResponse>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
+    }
 
     suspend fun bootstrapAdmin(
         token: String,
         name: String,
         email: String,
         password: String,
-    ): AuthResponse =
-        client.post("api/v1/auth/bootstrap-admin") {
+    ): AuthResponse {
+        val response = client.post("api/v1/auth/bootstrap-admin") {
             header("X-Bootstrap-Token", token)
             setBody(BootstrapAdminRequest(name, email, password))
-        }.body()
+        }
+        val envelope = response.body<ApiResponse<AuthResponse>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
+    }
 
-    suspend fun me(): MeResponse = client.get("api/v1/me").body()
+    suspend fun me(): MeResponse {
+        val response = client.get("api/v1/me")
+        val envelope = response.body<ApiResponse<MeResponse>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
+    }
 }

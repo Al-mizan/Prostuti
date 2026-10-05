@@ -1,5 +1,6 @@
 package com.prostuti.core.network
 
+import com.prostuti.core.model.ApiResponse
 import com.prostuti.core.model.Subject
 import com.prostuti.core.model.UserAttemptSummaryDto
 import com.prostuti.core.model.WrongAnswerItemDto
@@ -12,13 +13,21 @@ import io.ktor.client.request.*
  */
 class HistoryApi(private val client: HttpClient) {
 
-    suspend fun getAttempts(): List<UserAttemptSummaryDto> =
-        client.get("api/v1/history/attempts").body()
+    suspend fun getAttempts(): List<UserAttemptSummaryDto> {
+        val response = client.get("api/v1/history/attempts")
+        val envelope = response.body<ApiResponse<List<UserAttemptSummaryDto>>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
+    }
 
-    suspend fun getWrongAnswers(subject: Subject? = null): List<WrongAnswerItemDto> =
-        client.get("api/v1/history/wrong-answers") {
+    suspend fun getWrongAnswers(subject: Subject? = null): List<WrongAnswerItemDto> {
+        val response = client.get("api/v1/history/wrong-answers") {
             if (subject != null) {
                 parameter("subject", subject.name)
             }
-        }.body()
+        }
+        val envelope = response.body<ApiResponse<List<WrongAnswerItemDto>>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
+    }
 }

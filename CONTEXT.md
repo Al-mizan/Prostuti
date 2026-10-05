@@ -43,11 +43,13 @@ This document establishes the **ubiquitous language**, domain glossary, and cont
 
 ## 2. Architecture & Bounded Contexts
 
+> For the comprehensive multi-context system architecture and DDD context map, see [root CONTEXT.md](file:///home/almizan/Other Locations/workspace/Projects/hobby/prostuti/prostuti_app/CONTEXT.md) and [CONTEXT-MAP.md](file:///home/almizan/Other Locations/workspace/Projects/hobby/prostuti/prostuti_app/CONTEXT-MAP.md). See also [ADR 0003](file:///home/almizan/Other Locations/workspace/Projects/hobby/prostuti/prostuti_app/docs/adr/0003-migrate-to-standalone-typescript-express-backend.md).
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                     Client (Android)                        │
 │  androidApp                                                 │
-│  ├── feature/auth           (Login, Register)               │
+│  ├── feature/auth           (Login, Register, Google SSO)   │
 │  ├── feature/questionbank   (BCS Bank Browsing)             │
 │  ├── feature/practice       (9-Subject Practice Loop)       │
 │  ├── feature/exam           (Timed BCS Mock Test)           │
@@ -56,33 +58,28 @@ This document establishes the **ubiquitous language**, domain glossary, and cont
 │  └── feature/admin          (CSV Import, Question/User Mgmt)│
 │                                                             │
 │  core/network       core/database      core/designsystem    │
-│  (Ktor Client)      (Room Offline DB)  (Compose Theme)      │
+│  (ApiResponse<T>    (Room Offline DB)  (Compose Theme)      │
+│   Adapter)                                                  │
 │  core/common (Session, Result<T>)                           │
 └──────────────────────────────┬──────────────────────────────┘
-                               │ HTTPS / JSON (DTOs)
+                               │ HTTPS / JSON REST (/api/v1)
+                               │ Standard Envelope: { success, message, data, meta }
                                ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                     Server (JVM / Ktor)                     │
-│  server                                                     │
-│  ├── routes/        (Ktor Route handlers)                   │
-│  ├── services/      (Business logic & validations)          │
-│  ├── db/            (Exposed tables, DAOs & Neon Postgres)  │
-│  └── plugins/       (JWT Auth, CORS, Content Negotiation)   │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 Shared Model (KMP)                          │
-│  core/model (androidTarget + jvm("server"))                 │
-│  DTOs, Enums (Role, Subject, QuestionType, SessionType)     │
+│                 Standalone Backend API (/backend)           │
+│  Node.js 22+, TypeScript 5.9, Express 5.2, Prisma 7         │
+│  ├── Passport.js JWT Bearer & Google OAuth                  │
+│  ├── Neon PostgreSQL (users, questions, sessions, answers)  │
+│  ├── In-Memory Streaming CSV Parsing (busboy + csv-parse)   │
+│  └── In-Memory / Redis Caching                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ### Module Boundaries & Invariants
-1. **Multiplatform Target**: `core/model` is the ONLY multiplatform module (`androidTarget()` and `jvm("server")`). All other modules are plain Android or JVM modules.
-2. **Server-side Security Boundary**: Role verification (`Role.ADMIN`) is strictly enforced on Ktor backend routes via `adminOnly` interceptors. Client-side navigation visibility is UX only.
+1. **Response Envelope Adapter**: `core/network` unwraps the uniform `{ success, message, data, meta }` response envelope and throws typed `ApiException` on error, isolating domain features from transport details.
+2. **Server-side Security Boundary**: Role verification (`Role.ADMIN`) is strictly enforced on the backend API. Client-side navigation visibility is UX only.
 3. **Derived Entities**: `wrong_answers` and `leaderboard` are computed via SQL queries, never stored in redundant tables.
-4. **CSV Import**: Admin content import for Question Bank and Practice Questions uses standard CSV parsing (Apache Commons CSV) with strict validation.
+4. **Offline Cache**: Android Room database (`core/database`) caches downloaded question sets for offline resilience.
 
 ---
 

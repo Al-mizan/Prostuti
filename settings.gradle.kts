@@ -25,7 +25,7 @@ dependencyResolutionManagement {
 rootProject.name = "Prostuti"
 
 // ── Core ────────────────────────────────────────────────────────────
-include(":core:model")           // KMP: androidTarget() + jvm("server")
+include(":core:model")           // KMP: androidTarget()
 include(":core:network")         // Android library
 include(":core:database")        // Android library
 include(":core:designsystem")    // Android library
@@ -40,6 +40,5 @@ include(":feature:history")
 include(":feature:profile")
 include(":feature:admin")
 
-// ── App & Server ────────────────────────────────────────────────────
+// ── App ─────────────────────────────────────────────────────────────
 include(":androidApp")
-include(":server")

@@ -41,4 +41,9 @@ dependencies {
     // Ktor client (consumed via AuthApi from core/network)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.content.negotiation)
+
+    // Google Auth (Credential Manager)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.google.identity.googleid)
 }

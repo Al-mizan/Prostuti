@@ -12,9 +12,6 @@ kotlin {
         minSdk = 24
     }
 
-    // JVM target — consumed by the :server module
-    jvm("server")
-
     sourceSets {
         commonMain.dependencies {
             implementation(libs.kotlinx.serialization.json)

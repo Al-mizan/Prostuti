@@ -7,12 +7,12 @@
 
 ## Context and Problem Statement
 
-As the Prostuti KMP course project develops, architectural decisions need to be documented with clear rationale, tradeoffs, and scope boundaries so contributors and AI agents stay aligned with project constraints.
+As the Prostuti project develops across client and backend contexts, architectural decisions need to be documented with clear rationale, tradeoffs, and scope boundaries so contributors and AI agents stay aligned with project constraints.
 
 ## Decision Drivers
 
-- Course rubric requirements and deadline scoping.
-- Clarity on technical choices (KMP boundaries, embedded server, PostgreSQL/Neon, auth).
+- Rubric requirements and deadline scoping.
+- Clarity on technical choices (KMP boundaries, database mapping, backend migration, auth).
 - Preventing accidental scope creep or over-engineering.
 
 ## Decision Outcome

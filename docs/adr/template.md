@@ -1,52 +1,45 @@
-# ADR [NUMBER]: [Short Title of Decision]
+# ADR [NUMBER]: [TITLE]
 
-- **Status:** Proposed | Accepted | Deprecated | Superseded
+- **Status:** [Draft | Proposed | Accepted | Rejected | Deprecated | Superseded by ADR XXXX]
 - **Date:** YYYY-MM-DD
-- **Authors:** [Name / Team]
-- **Tags:** [architecture, database, networking, etc.]
+- **Authors:** Prostuti Team
+- **Tags:** [tags, separated, by, commas]
 
 ## Context and Problem Statement
 
-What is the problem being solved? What are the constraints, requirements, and background motivating this decision?
+[Describe the context and problem statement, e.g., in free form using two to three sentences. What forces are at play? What constraints exist?]
 
 ## Decision Drivers
 
-- [Driver 1, e.g. Course constraints / deadline]
-- [Driver 2, e.g. Performance / simplicity]
-- [Driver 3, e.g. Single-platform Kotlin ecosystem]
+- [driver 1, e.g., maintainability, performance, security]
+- [driver 2, e.g., timeline, scope constraints]
 
 ## Considered Options
 
-1. Option 1
-2. Option 2
-3. Option 3
+- [Option 1]
+- [Option 2]
+- [Option 3]
 
 ## Decision Outcome
 
-Chosen option: "[Option X]", because [justification].
+Chosen option: "[option 1]", because [justification. e.g., only option that meets requirement X while staying within scope Y].
 
 ### Positive Consequences
 
-- [Benefit 1]
-- [Benefit 2]
+- [e.g., improvement in velocity, reduction in technical debt]
 
 ### Negative Consequences / Trade-offs
 
-- [Limitation 1]
-- [Limitation 2]
+- [e.g., increased complexity in area X, operational overhead]
 
 ## Pros and Cons of the Options
 
-### Option 1
+### [Option 1]
 
 - Good, because [argument a]
 - Bad, because [argument b]
 
-### Option 2
+### [Option 2]
 
 - Good, because [argument a]
 - Bad, because [argument b]
-
-## More Information
-
-Links to specs, issues, or documentation (e.g. `docs/project_guide.md`, `docs/backend_design.md`).

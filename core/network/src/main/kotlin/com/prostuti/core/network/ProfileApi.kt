@@ -1,5 +1,6 @@
 package com.prostuti.core.network
 
+import com.prostuti.core.model.ApiResponse
 import com.prostuti.core.model.UpdateProfileRequest
 import com.prostuti.core.model.UserProfileDto
 import io.ktor.client.*
@@ -12,11 +13,20 @@ import io.ktor.http.*
  */
 class ProfileApi(private val client: HttpClient) {
 
-    suspend fun getProfile(): UserProfileDto =
-        client.get("api/v1/profile").body()
+    suspend fun getProfile(): UserProfileDto {
+        val response = client.get("api/v1/profile")
+        val envelope = response.body<ApiResponse<UserProfileDto>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
+    }
 
-    suspend fun updateProfile(request: UpdateProfileRequest): UserProfileDto =
-        client.put("api/v1/profile") {
+    suspend fun updateProfile(request: UpdateProfileRequest): UserProfileDto {
+        val response = client.put("api/v1/profile") {
+            contentType(ContentType.Application.Json)
             setBody(request)
-        }.body()
+        }
+        val envelope = response.body<ApiResponse<UserProfileDto>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
+    }
 }

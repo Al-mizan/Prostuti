@@ -1,7 +1,0 @@
-exam_session,subject,topic,question_text,option_a,option_b,option_c,option_d,correct_option,explanation,difficulty
-"45th BCS Preliminary",BENGALI,"সন্ধি","প্রশ্ন: 'সূর্যোদয়' শব্দে সন্ধির নাম কী?","স্বরসন্ধি","ব্যঞ্জনসন্ধি","যোগরূপ দ্বন্দ্ব সন্ধি","কোনোটিই নয়",A,"",EASY
-"45th BCS Preliminary",MATH,"বীজগণিত","x + 5 = 12 হলে x এর মান কত?","5","6","7","8",C,"x = 12 - 5 = 7",EASY
-"45th BCS Preliminary",GEOGRAPHY,"মহাদেশ","এশিয়া মহাদেশের বৃহত্তম দেশ কোনটি?","ভারত","চীন","রাশিয়া","জাপান",B,"",MEDIUM
-"45th BCS Preliminary",ENGLISH,"Vocabulary","Choose the synonym of BENEVOLENT.","Cruel","Kind","Angry","Lazy",B,"Benevolent means 'well-meaning, kindly'.",EASY
-"45th BCS Preliminary",BIO,"কোষবিদ্যা","কোষের শক্তি ঘর (power house) কোনটি?","রাইবোসোম","মাইটোকন্ড্রিয়া","লাইসোসোম","গলজি বডি",B,"subject BIO is not in the 9-subject enum — row must be rejected.",MEDIUM
-"45th BCS Preliminary",SCIENCE,"রসায়ন","পানির রাসায়নিক সংকেত কী?","H2O","CO2","O2","NaCl",Z,"Z is not a valid option letter — row must be rejected.",EASY

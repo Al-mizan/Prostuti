@@ -2,6 +2,7 @@ package com.prostuti.core.network
 
 import com.prostuti.core.model.AdminQuestionDto
 import com.prostuti.core.model.AdminUserDto
+import com.prostuti.core.model.ApiResponse
 import com.prostuti.core.model.ImportSummary
 import com.prostuti.core.model.Page
 import com.prostuti.core.model.QuestionType
@@ -14,6 +15,7 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
+import kotlinx.serialization.json.JsonElement
 
 /**
  * Network API client for role-gated admin operations:
@@ -23,8 +25,8 @@ import io.ktor.http.*
  */
 class AdminApi(private val client: HttpClient) {
 
-    suspend fun importQuestionBankCsv(fileName: String, bytes: ByteArray): ImportSummary =
-        client.submitFormWithBinaryData(
+    suspend fun importQuestionBankCsv(fileName: String, bytes: ByteArray): ImportSummary {
+        val response = client.submitFormWithBinaryData(
             url = "api/v1/admin/question-bank/import",
             formData = formData {
                 append("file", bytes, Headers.build {
@@ -32,10 +34,14 @@ class AdminApi(private val client: HttpClient) {
                     append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
                 })
             }
-        ).body()
+        )
+        val envelope = response.body<ApiResponse<ImportSummary>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
+    }
 
-    suspend fun importPracticeCsv(fileName: String, bytes: ByteArray): ImportSummary =
-        client.submitFormWithBinaryData(
+    suspend fun importPracticeCsv(fileName: String, bytes: ByteArray): ImportSummary {
+        val response = client.submitFormWithBinaryData(
             url = "api/v1/admin/practice-questions/import",
             formData = formData {
                 append("file", bytes, Headers.build {
@@ -43,7 +49,11 @@ class AdminApi(private val client: HttpClient) {
                     append(HttpHeaders.ContentDisposition, "filename=\"$fileName\"")
                 })
             }
-        ).body()
+        )
+        val envelope = response.body<ApiResponse<ImportSummary>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
+    }
 
     suspend fun getQuestions(
         type: QuestionType? = null,
@@ -51,30 +61,50 @@ class AdminApi(private val client: HttpClient) {
         subject: Subject? = null,
         page: Int = 0,
         pageSize: Int = 50,
-    ): Page<AdminQuestionDto> = client.get("api/v1/admin/questions") {
-        parameter("page", page)
-        parameter("pageSize", pageSize)
-        if (type != null) parameter("type", type.name)
-        if (!examSession.isNullOrBlank()) parameter("examSession", examSession)
-        if (subject != null) parameter("subject", subject.name)
-    }.body()
-
-    suspend fun updateQuestion(id: String, request: UpdateQuestionRequest): AdminQuestionDto =
-        client.put("api/v1/admin/questions/$id") {
-            contentType(ContentType.Application.Json)
-            setBody(request)
-        }.body()
-
-    suspend fun deleteQuestion(id: String) {
-        client.delete("api/v1/admin/questions/$id")
+    ): Page<AdminQuestionDto> {
+        val response = client.get("api/v1/admin/questions") {
+            parameter("page", page)
+            parameter("pageSize", pageSize)
+            if (type != null) parameter("type", type.name)
+            if (!examSession.isNullOrBlank()) parameter("examSession", examSession)
+            if (subject != null) parameter("subject", subject.name)
+        }
+        val envelope = response.body<ApiResponse<Page<AdminQuestionDto>>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
     }
 
-    suspend fun getUsers(): List<AdminUserDto> =
-        client.get("api/v1/admin/users").body()
+    suspend fun updateQuestion(id: String, request: UpdateQuestionRequest): AdminQuestionDto {
+        val response = client.put("api/v1/admin/questions/$id") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
+        val envelope = response.body<ApiResponse<AdminQuestionDto>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
+    }
 
-    suspend fun updateUserRole(id: String, role: Role): AdminUserDto =
-        client.put("api/v1/admin/users/$id/role") {
+    suspend fun deleteQuestion(id: String) {
+        val response = client.delete("api/v1/admin/questions/$id")
+        if (response.status == HttpStatusCode.NoContent) return
+        val envelope = response.body<ApiResponse<JsonElement?>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+    }
+
+    suspend fun getUsers(): List<AdminUserDto> {
+        val response = client.get("api/v1/admin/users")
+        val envelope = response.body<ApiResponse<List<AdminUserDto>>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
+    }
+
+    suspend fun updateUserRole(id: String, role: Role): AdminUserDto {
+        val response = client.put("api/v1/admin/users/$id/role") {
             contentType(ContentType.Application.Json)
             setBody(UpdateRoleRequest(role))
-        }.body()
+        }
+        val envelope = response.body<ApiResponse<AdminUserDto>>()
+        if (!envelope.success) throw ApiException(envelope.message, response.status.value)
+        return envelope.data ?: throw ApiException(envelope.message, response.status.value)
+    }
 }

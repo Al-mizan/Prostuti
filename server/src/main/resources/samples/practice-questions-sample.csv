@@ -1,6 +1,0 @@
-subject,topic,question_text,option_a,option_b,option_c,option_d,correct_option,explanation,difficulty
-MATH,"বীজগণিত","5 + 3 × 2 = ?","11","16","13","10",E,"E is not a valid option letter — must be A/B/C/D.",EASY
-MATH,"বীজগণিত","2^10 = ?","512","1024","256","2048",B,"2^10 = 1024",EASY
-MATH,"জ্যামিতি","একটি ত্রিভুজের কোণগুলোর সমষ্টি কত?","90°","180°","270°","360°",B,"",EASY
-MATH,"পাটীগণিত","12 × 15 = ?","150","160","170","180",D,"12 × 15 = 180",MEDIUM
-MATH,"পাটীগণিত","","ক","খ","গ","ঘ",A,"question_text is blank — must be rejected.",EASY
