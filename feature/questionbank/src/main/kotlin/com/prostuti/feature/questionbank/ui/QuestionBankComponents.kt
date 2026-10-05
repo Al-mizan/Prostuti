@@ -1,5 +1,6 @@
 package com.prostuti.feature.questionbank.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,14 +22,23 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.FactCheck
-import androidx.compose.material.icons.filled.HelpOutline
+import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -43,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -57,71 +68,111 @@ data class SubjectCardDesign(
     val subject: Subject,
     val titleBangla: String,
     val subtitleBangla: String,
-    val watermark: String,
-    val gradientColors: List<Color>,
+    val marksBangla: String,
+    val icon: ImageVector,
+    val accentColor: Color,
+    val containerColor: Color,
+    val watermark: String = "",
+    val gradientColors: List<Color> = listOf(accentColor, accentColor),
 )
 
 val BcsSubjectCards = listOf(
     SubjectCardDesign(
         subject = Subject.BENGALI,
         titleBangla = "বাংলা ভাষা ও সাহিত্য",
-        subtitleBangla = "৩৫ নম্বর • ব্যাকরণ ও সাহিত্য",
+        subtitleBangla = "ব্যাকরণ ও সাহিত্য",
+        marksBangla = "৩৫ নম্বর",
+        icon = Icons.Default.Translate,
+        accentColor = Color(0xFFE11D48),
+        containerColor = Color(0xFFFFF1F2),
         watermark = "অ",
         gradientColors = listOf(Color(0xFFE11D48), Color(0xFF9F1239)),
     ),
     SubjectCardDesign(
         subject = Subject.ENGLISH,
         titleBangla = "ইংরেজি ভাষা ও সাহিত্য",
-        subtitleBangla = "৩৫ নম্বর • Grammar & Literature",
+        subtitleBangla = "Grammar & Literature",
+        marksBangla = "৩৫ নম্বর",
+        icon = Icons.Default.Language,
+        accentColor = Color(0xFF2563EB),
+        containerColor = Color(0xFFEFF6FF),
         watermark = "A",
         gradientColors = listOf(Color(0xFF2563EB), Color(0xFF1E40AF)),
     ),
     SubjectCardDesign(
         subject = Subject.BD_INTERNATIONAL_AFFAIRS,
-        titleBangla = "বাংলাদেশ ও আন্তর্জাতিক বিষয়াবলি",
-        subtitleBangla = "৫০ নম্বর • জাতীয় ও বৈশ্বিক বিষয়",
+        titleBangla = "বাংলাদেশ ও আন্তর্জাতিক বিষয়",
+        subtitleBangla = "জাতীয় ও বৈশ্বিক বিষয়",
+        marksBangla = "৫০ নম্বর",
+        icon = Icons.Default.Public,
+        accentColor = Color(0xFF059669),
+        containerColor = Color(0xFFECFDF5),
         watermark = "ব",
         gradientColors = listOf(Color(0xFF059669), Color(0xFF047857)),
     ),
     SubjectCardDesign(
         subject = Subject.GEOGRAPHY,
-        titleBangla = "ভূগোল, পরিবেশ ও দুর্যোগ",
-        subtitleBangla = "১০ নম্বর • বাংলাদেশ ও বিশ্ব ভূগোল",
+        titleBangla = "ভূগোল ও পরিবেশ",
+        subtitleBangla = "বাংলাদেশ ও বিশ্ব ভূগোল",
+        marksBangla = "১০ নম্বর",
+        icon = Icons.AutoMirrored.Filled.MenuBook,
+        accentColor = Color(0xFF0891B2),
+        containerColor = Color(0xFFECFEFF),
         watermark = "ভূ",
         gradientColors = listOf(Color(0xFF0891B2), Color(0xFF0E7490)),
     ),
     SubjectCardDesign(
         subject = Subject.SCIENCE,
         titleBangla = "সাধারণ বিজ্ঞান",
-        subtitleBangla = "১৫ নম্বর • ভৌত, জীব ও আধুনিক বিজ্ঞান",
+        subtitleBangla = "ভৌত ও আধুনিক বিজ্ঞান",
+        marksBangla = "১৫ নম্বর",
+        icon = Icons.Default.Science,
+        accentColor = Color(0xFF7C3AED),
+        containerColor = Color(0xFFF5F3FF),
         watermark = "বি",
         gradientColors = listOf(Color(0xFF7C3AED), Color(0xFF6D28D9)),
     ),
     SubjectCardDesign(
         subject = Subject.IT,
         titleBangla = "কম্পিউটার ও তথ্যপ্রযুক্তি",
-        subtitleBangla = "১৫ নম্বর • হার্ডওয়্যার ও সফটওয়্যার",
+        subtitleBangla = "হার্ডওয়্যার ও তথ্যপ্রযুক্তি",
+        marksBangla = "১৫ নম্বর",
+        icon = Icons.Default.Computer,
+        accentColor = Color(0xFFEA580C),
+        containerColor = Color(0xFFFFF7ED),
         watermark = "ত",
         gradientColors = listOf(Color(0xFFEA580C), Color(0xFFC2410C)),
     ),
     SubjectCardDesign(
         subject = Subject.MATH,
         titleBangla = "গাণিতিক যুক্তি",
-        subtitleBangla = "১৫ নম্বর • পাটিগণিত, বীজগণিত ও জ্যামিতি",
+        subtitleBangla = "পাটিগণিত ও বীজগণিত",
+        marksBangla = "১৫ নম্বর",
+        icon = Icons.Default.Calculate,
+        accentColor = Color(0xFFC026D3),
+        containerColor = Color(0xFFFDF4FF),
         watermark = "∑",
         gradientColors = listOf(Color(0xFFC026D3), Color(0xFFA21CAF)),
     ),
     SubjectCardDesign(
         subject = Subject.MENTAL_ABILITY,
         titleBangla = "মানসিক দক্ষতা",
-        subtitleBangla = "১৫ নম্বর • ভাষাগত ও যুক্তি বিশ্লেষণ",
+        subtitleBangla = "যুক্তিমূলক বিশ্লেষণ",
+        marksBangla = "১৫ নম্বর",
+        icon = Icons.Default.Psychology,
+        accentColor = Color(0xFF0284C7),
+        containerColor = Color(0xFFF0F9FF),
         watermark = "মা",
         gradientColors = listOf(Color(0xFF0284C7), Color(0xFF0369A1)),
     ),
     SubjectCardDesign(
         subject = Subject.ETHICS,
-        titleBangla = "নৈতিকতা, মূল্যবোধ ও সুশাসন",
-        subtitleBangla = "১০ নম্বর • সুশাসন ও মূল্যবোধ শিক্ষা",
+        titleBangla = "নৈতিকতা ও সুশাসন",
+        subtitleBangla = "মূল্যবোধ ও সুশাসন",
+        marksBangla = "১০ নম্বর",
+        icon = Icons.Default.Gavel,
+        accentColor = Color(0xFF0D9488),
+        containerColor = Color(0xFFF0FDFA),
         watermark = "নৌ",
         gradientColors = listOf(Color(0xFF0D9488), Color(0xFF115E59)),
     ),
@@ -249,7 +300,7 @@ fun LiveModelTestBannerCard(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.HelpOutline,
+                        imageVector = Icons.AutoMirrored.Filled.HelpOutline,
                         contentDescription = null,
                         tint = Color(0xFF93C5FD),
                         modifier = Modifier.size(16.dp),
@@ -384,91 +435,117 @@ fun InstituteBcsCard(
 }
 
 /**
- * 9-subject visual grid corresponding to BCS syllabus subjects.
+ * Modern 2-column visual grid for the 9 BCS subjects with soft pastel cards,
+ * clear mark badges, and high-contrast typography.
  */
 @Composable
 fun SubjectCardsGrid(
     onSubjectClick: (Subject) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val rows = BcsSubjectCards.chunked(2)
     Column(
         modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        BcsSubjectCards.forEach { card ->
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(96.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Brush.horizontalGradient(card.gradientColors))
-                    .clickable { onSubjectClick(card.subject) },
+        rows.forEach { rowCards ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    // Large watermark letter in top-right corner
-                    Text(
-                        text = card.watermark,
-                        fontSize = 72.sp,
-                        fontWeight = FontWeight.Black,
-                        color = Color.White.copy(alpha = 0.16f),
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .padding(end = 16.dp),
+                rowCards.forEach { card ->
+                    ModernSubjectCard(
+                        card = card,
+                        onClick = { onSubjectClick(card.subject) },
+                        modifier = Modifier.weight(1f),
                     )
-
-                    // Text content
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 20.dp, vertical = 14.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            modifier = Modifier.weight(1f),
-                        ) {
-                            Text(
-                                text = card.titleBangla,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = card.subtitleBangla,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color.White.copy(alpha = 0.85f),
-                            )
-                        }
-
-                        Surface(
-                            shape = CircleShape,
-                            color = Color.White.copy(alpha = 0.2f),
-                            modifier = Modifier.size(36.dp),
-                        ) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize(),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ChevronRight,
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp),
-                                )
-                            }
-                        }
-                    }
+                }
+                if (rowCards.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ModernSubjectCard(
+    card: SubjectCardDesign,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = card.containerColor,
+        border = BorderStroke(1.dp, card.accentColor.copy(alpha = 0.22f)),
+        shadowElevation = 1.dp,
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = card.accentColor.copy(alpha = 0.14f),
+                    modifier = Modifier.size(36.dp),
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = card.icon,
+                            contentDescription = null,
+                            tint = card.accentColor,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = card.accentColor.copy(alpha = 0.12f),
+                ) {
+                    Text(
+                        text = card.marksBangla,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = card.accentColor,
+                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(10.dp))
+
+            Text(
+                text = card.titleBangla,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                lineHeight = 18.sp,
+            )
+
+            Spacer(Modifier.height(4.dp))
+
+            Text(
+                text = card.subtitleBangla,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }

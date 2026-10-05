@@ -106,14 +106,14 @@ fun HomeScreen(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 20.dp),
+            .padding(horizontal = 16.dp, vertical = 16.dp),
     ) {
         // Hero Card with Mascot & Greeting
         Surface(
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(20.dp),
             color = MaterialTheme.colorScheme.surface,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
-            shadowElevation = 3.dp,
+            shadowElevation = 2.dp,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Box(
@@ -122,12 +122,12 @@ fun HomeScreen(
                     .background(
                         Brush.linearGradient(
                             listOf(
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
                                 MaterialTheme.colorScheme.surface,
                             )
                         )
                     )
-                    .padding(20.dp)
+                    .padding(16.dp)
             ) {
                 Column {
                     Row(
@@ -136,11 +136,11 @@ fun HomeScreen(
                     ) {
                         MascotAvatar(
                             avatarId = avatarId,
-                            size = 72.dp,
+                            size = 64.dp,
                             onClick = onNavigateToProfile,
                         )
 
-                        Spacer(Modifier.width(16.dp))
+                        Spacer(Modifier.width(14.dp))
 
                         Column(modifier = Modifier.weight(1f)) {
                             Row(
@@ -149,7 +149,7 @@ fun HomeScreen(
                             ) {
                                 Text(
                                     text = "স্বাগতম,",
-                                    style = MaterialTheme.typography.labelLarge,
+                                    style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                                 if (role == Role.ADMIN) {
@@ -163,38 +163,38 @@ fun HomeScreen(
 
                             Text(
                                 text = userName,
-                                style = MaterialTheme.typography.titleLarge,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
 
                             Text(
                                 text = "${preset.nameBangla} • ${preset.subtitle}",
-                                style = MaterialTheme.typography.labelMedium,
+                                style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.SemiBold,
                             )
                         }
                     }
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(12.dp))
 
                     // Mascot Inspiring Quote Pill
                     Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(
                             text = "“${preset.quoteBangla}”",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                         )
                     }
 
-                    Spacer(Modifier.height(14.dp))
+                    Spacer(Modifier.height(12.dp))
 
                     // XP Level Progression
                     Row(
@@ -225,14 +225,14 @@ fun HomeScreen(
             }
         }
 
-        Spacer(Modifier.height(18.dp))
+        Spacer(Modifier.height(16.dp))
 
         // Weekly Streak & Goals Card
         ProstutiCard(
             borderColor = Color(0xFFFED7AA),
             containerColor = Color(0xFFFFFBEB),
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -241,7 +241,7 @@ fun HomeScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(42.dp)
+                                .size(38.dp)
                                 .clip(CircleShape)
                                 .background(Color(0xFFFFEDD5)),
                             contentAlignment = Alignment.Center,
@@ -250,10 +250,10 @@ fun HomeScreen(
                                 Icons.Default.LocalFireDepartment,
                                 contentDescription = "Streak",
                                 tint = Color(0xFFEA580C),
-                                modifier = Modifier.size(26.dp),
+                                modifier = Modifier.size(22.dp),
                             )
                         }
-                        Spacer(Modifier.width(12.dp))
+                        Spacer(Modifier.width(10.dp))
                         Column {
                             Text(
                                 text = "${toBanglaDigits(stats.streakDays)} দিনের ধারাবাহিকতা",
@@ -262,7 +262,7 @@ fun HomeScreen(
                                 color = Color(0xFF7C2D12),
                             )
                             Text(
-                                text = "প্রতিদিনের অনুশীলনে স্ট্রিক ধরে রাখুন",
+                                text = "প্রতিদিনের অনুশীলনে সক্রিয় থাকুন",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color(0xFF9A3412),
                             )
@@ -281,7 +281,7 @@ fun HomeScreen(
                             Icon(
                                 Icons.Default.Star,
                                 contentDescription = null,
-                                modifier = Modifier.size(16.dp),
+                                modifier = Modifier.size(15.dp),
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
@@ -318,7 +318,7 @@ fun HomeScreen(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(32.dp)
+                                    .size(28.dp)
                                     .clip(CircleShape)
                                     .background(
                                         when {
@@ -334,7 +334,7 @@ fun HomeScreen(
                                         Icons.Default.Check,
                                         contentDescription = null,
                                         tint = Color.White,
-                                        modifier = Modifier.size(18.dp),
+                                        modifier = Modifier.size(16.dp),
                                     )
                                 }
                             }
@@ -350,7 +350,7 @@ fun HomeScreen(
             }
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(20.dp))
 
         // Main Modules Header
         Text(
@@ -360,52 +360,52 @@ fun HomeScreen(
             color = MaterialTheme.colorScheme.onSurface,
         )
 
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(12.dp))
 
         // BCS Question Bank Card
         DashboardActionCard(
             title = "বিসিএস প্রশ্ন ব্যাংক",
-            subtitle = "বিগত ৪৫তম থেকে ৩৫তম বিসিএস পরীক্ষার অধ্যায়ভিত্তিক প্রশ্ন ও সমাধান",
-            badgeText = "BCS Question Bank",
+            subtitle = "বিগত বিসিএস পরীক্ষার অধ্যায়ভিত্তিক প্রশ্ন ও সমাধান",
+            badgeText = "প্রশ্ন ব্যাংক",
             icon = Icons.AutoMirrored.Filled.LibraryBooks,
             iconColor = MaterialTheme.colorScheme.primary,
             iconBgColor = MaterialTheme.colorScheme.primaryContainer,
             onClick = onNavigateToQuestionBank,
         )
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(10.dp))
 
         // Subject Practice Card
         DashboardActionCard(
             title = "বিষয়ভিত্তিক অনুশীলন",
-            subtitle = "বাংলা, ইংরেজি, সাধারণ জ্ঞান ও গণিত সহ ৯টি বিষয়ের পূর্ণাঙ্গ প্রস্তুতি",
-            badgeText = "9 Subjects",
+            subtitle = "৯টি বিষয়ের অধ্যায়ভিত্তিক পূর্ণাঙ্গ প্রস্তুতি",
+            badgeText = "৯টি বিষয়",
             icon = Icons.AutoMirrored.Filled.MenuBook,
             iconColor = Color(0xFF0D9488),
             iconBgColor = Color(0xFFCCFBF1),
             onClick = onNavigateToPractice,
         )
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(10.dp))
 
         // Timed Mock Exam Card
         DashboardActionCard(
             title = "পূর্ণাঙ্গ টাইমড মক টেস্ট",
-            subtitle = "বাস্তব পরীক্ষার অভিজ্ঞতা: ২০০ নম্বর, সময় ১২০ মিনিট, তাৎক্ষণিক ফলাফল ও বিশ্লেষণ",
-            badgeText = "Mock Exam",
+            subtitle = "২০০ নম্বর ও ১২০ মিনিটের রিয়েল-টাইম পরীক্ষা",
+            badgeText = "মক টেস্ট",
             icon = Icons.Default.Timer,
             iconColor = Color(0xFF2563EB),
             iconBgColor = Color(0xFFDBEAFE),
             onClick = onNavigateToExam,
         )
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(10.dp))
 
         // History & Wrong Answers Card
         DashboardActionCard(
-            title = "পরীক্ষার ইতিহাস ও ভুল উত্তর",
-            subtitle = "বিগত সব প্রচেষ্টার ফলাফল এবং ভুল উত্তরসমূহ রিভিশন ডেক",
-            badgeText = "History",
+            title = "পরীক্ষার ইতিহাস ও রিভিশন",
+            subtitle = "বিগত ফলাফল এবং ভুল উত্তরসমূহ রিভিশন ডেক",
+            badgeText = "রিভিশন",
             icon = Icons.Default.History,
             iconColor = Color(0xFF7C3AED),
             iconBgColor = Color(0xFFEDE9FE),
@@ -414,19 +414,19 @@ fun HomeScreen(
 
         // Admin Card (Visible to Role.ADMIN)
         if (role == Role.ADMIN) {
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(20.dp))
             Text(
                 text = "প্রশাসনিক প্যানেল",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(10.dp))
 
             DashboardActionCard(
                 title = "অ্যাডমিন কন্ট্রোল পোর্টাল",
-                subtitle = "নতুন প্রশ্ন CSV ইমপোর্ট, প্রশ্ন ব্যাংক আপডেট এবং ইউজার ম্যানেজমেন্ট",
-                badgeText = "ADMIN ONLY",
+                subtitle = "প্রশ্ন CSV ইমপোর্ট ও সিস্টেম ম্যানেজমেন্ট",
+                badgeText = "অ্যাডমিন",
                 icon = Icons.Default.AdminPanelSettings,
                 iconColor = MaterialTheme.colorScheme.error,
                 iconBgColor = MaterialTheme.colorScheme.errorContainer,
@@ -434,7 +434,7 @@ fun HomeScreen(
             )
         }
 
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(24.dp))
     }
 }
 
@@ -455,8 +455,8 @@ private fun DashboardActionCard(
         ) {
             Box(
                 modifier = Modifier
-                    .size(52.dp)
-                    .clip(RoundedCornerShape(14.dp))
+                    .size(46.dp)
+                    .clip(RoundedCornerShape(12.dp))
                     .background(iconBgColor),
                 contentAlignment = Alignment.Center,
             ) {
@@ -464,11 +464,11 @@ private fun DashboardActionCard(
                     icon,
                     contentDescription = null,
                     tint = iconColor,
-                    modifier = Modifier.size(28.dp),
+                    modifier = Modifier.size(24.dp),
                 )
             }
 
-            Spacer(Modifier.width(16.dp))
+            Spacer(Modifier.width(14.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Row(
@@ -478,7 +478,7 @@ private fun DashboardActionCard(
                 ) {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                     )
                     ProstutiBadge(
@@ -487,12 +487,12 @@ private fun DashboardActionCard(
                         contentColor = iconColor,
                     )
                 }
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(3.dp))
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 17.sp,
+                    lineHeight = 16.sp,
                 )
             }
 
@@ -501,8 +501,8 @@ private fun DashboardActionCard(
             Icon(
                 Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                modifier = Modifier.size(18.dp),
             )
         }
     }

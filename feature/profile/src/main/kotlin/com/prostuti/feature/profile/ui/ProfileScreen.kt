@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -117,24 +118,24 @@ fun ProfileScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 20.dp, vertical = 20.dp),
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
                         text = "ব্যবহারকারী প্রোফাইল",
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
 
-                    Spacer(Modifier.height(20.dp))
+                    Spacer(Modifier.height(16.dp))
 
                     // Hero Profile Card
                     Surface(
-                        shape = RoundedCornerShape(24.dp),
+                        shape = RoundedCornerShape(20.dp),
                         color = MaterialTheme.colorScheme.surface,
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
-                        shadowElevation = 3.dp,
+                        shadowElevation = 2.dp,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Box(
@@ -143,12 +144,12 @@ fun ProfileScreen(
                                 .background(
                                     Brush.verticalGradient(
                                         listOf(
-                                            preset.backgroundColor.copy(alpha = 0.6f),
+                                            preset.backgroundColor.copy(alpha = 0.5f),
                                             MaterialTheme.colorScheme.surface,
                                         )
                                     )
                                 )
-                                .padding(20.dp)
+                                .padding(16.dp)
                         ) {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -158,16 +159,16 @@ fun ProfileScreen(
                                 Box(contentAlignment = Alignment.BottomEnd) {
                                     MascotAvatar(
                                         avatarId = profile.avatarId,
-                                        size = 96.dp,
+                                        size = 84.dp,
                                         onClick = { showMascotPickerSheet = true },
                                     )
                                     Surface(
                                         shape = CircleShape,
                                         color = preset.primaryColor,
                                         contentColor = Color.White,
-                                        shadowElevation = 4.dp,
+                                        shadowElevation = 3.dp,
                                         modifier = Modifier
-                                            .size(30.dp)
+                                            .size(28.dp)
                                             .clip(CircleShape)
                                             .clickable { showMascotPickerSheet = true },
                                     ) {
@@ -175,13 +176,13 @@ fun ProfileScreen(
                                             Icon(
                                                 Icons.Default.Edit,
                                                 contentDescription = "ম্যাসকট পরিবর্তন",
-                                                modifier = Modifier.size(15.dp),
+                                                modifier = Modifier.size(14.dp),
                                             )
                                         }
                                     }
                                 }
 
-                                Spacer(Modifier.height(14.dp))
+                                Spacer(Modifier.height(12.dp))
 
                                 // Name with Edit Icon
                                 Row(
@@ -190,12 +191,12 @@ fun ProfileScreen(
                                 ) {
                                     Text(
                                         text = profile.name,
-                                        style = MaterialTheme.typography.titleLarge,
+                                        style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
                                     )
                                     IconButton(
                                         onClick = { showEditNameDialog = true },
-                                        modifier = Modifier.size(32.dp),
+                                        modifier = Modifier.size(44.dp),
                                     ) {
                                         Icon(
                                             Icons.Default.Edit,
@@ -208,13 +209,13 @@ fun ProfileScreen(
 
                                 // Mascot & Role Subtitle
                                 Text(
-                                    text = "${preset.nameBangla} (${preset.titleEnglish}) • ${preset.subtitle}",
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    text = "${preset.nameBangla} • ${preset.subtitle}",
+                                    style = MaterialTheme.typography.bodySmall,
                                     color = preset.primaryColor,
                                     fontWeight = FontWeight.SemiBold,
                                 )
 
-                                Spacer(Modifier.height(8.dp))
+                                Spacer(Modifier.height(6.dp))
 
                                 val roleLabel = if (profile.role == Role.ADMIN) "অ্যাডমিন (Admin)" else "শিক্ষার্থী (Student)"
                                 val roleColor = if (profile.role == Role.ADMIN) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
@@ -235,7 +236,7 @@ fun ProfileScreen(
                     val stats = state.stats
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         ProfileStatBox(
                             title = "স্ট্রিক",
@@ -264,7 +265,7 @@ fun ProfileScreen(
                     }
 
                     if (state.errorMessage != null) {
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(10.dp))
                         Text(
                             text = state.errorMessage,
                             color = MaterialTheme.colorScheme.error,
@@ -273,30 +274,30 @@ fun ProfileScreen(
                     }
 
                     if (state.isUpdating) {
-                        Spacer(Modifier.height(12.dp))
+                        Spacer(Modifier.height(10.dp))
                         CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                     }
 
-                    Spacer(Modifier.height(20.dp))
+                    Spacer(Modifier.height(16.dp))
 
                     // Mascot Persona Quote Card
                     Surface(
-                        shape = RoundedCornerShape(16.dp),
+                        shape = RoundedCornerShape(14.dp),
                         color = preset.backgroundColor,
                         border = BorderStroke(1.dp, preset.primaryColor.copy(alpha = 0.25f)),
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Row(
-                            modifier = Modifier.padding(16.dp),
+                            modifier = Modifier.padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             Icon(
                                 Icons.Default.FormatQuote,
                                 contentDescription = null,
                                 tint = preset.primaryColor,
-                                modifier = Modifier.size(24.dp),
+                                modifier = Modifier.size(20.dp),
                             )
-                            Spacer(Modifier.width(10.dp))
+                            Spacer(Modifier.width(8.dp))
                             Text(
                                 text = preset.quoteBangla,
                                 style = MaterialTheme.typography.bodySmall,
@@ -306,11 +307,11 @@ fun ProfileScreen(
                         }
                     }
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(14.dp))
 
                     // Account Information Card
                     ProstutiCard {
-                        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text(
                                 text = "অ্যাকাউন্ট বিবরণ",
                                 style = MaterialTheme.typography.titleMedium,
@@ -337,21 +338,21 @@ fun ProfileScreen(
                         }
                     }
 
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(14.dp))
 
                     // Profile Actions Card
                     ProstutiCard {
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             ProfileActionItem(
                                 icon = Icons.Default.History,
-                                title = "পরীক্ষার ইতিহাস ও ভুল উত্তর",
+                                title = "পরীক্ষার ইতিহাস ও রিভিশন",
                                 subtitle = "বিগত প্রচেষ্টা এবং ভুল উত্তরসমূহ পর্যালোচনা করুন",
                                 onClick = onNavigateToHistory,
                             )
                             ProfileActionItem(
                                 icon = Icons.Default.Face,
                                 title = "ম্যাসকট পরিবর্তন করুন",
-                                subtitle = "৬টি অনন্য ম্যাসকট থেকে আপনার পছন্দেরটি বেছে নিন",
+                                subtitle = "৬টি অনন্য ম্যাসকট থেকে পছন্দেরটি বেছে নিন",
                                 onClick = { showMascotPickerSheet = true },
                             )
                             ProfileActionItem(
@@ -363,7 +364,7 @@ fun ProfileScreen(
                         }
                     }
 
-                    Spacer(Modifier.height(24.dp))
+                    Spacer(Modifier.height(20.dp))
 
                     // Logout Button
                     OutlinedButton(
@@ -375,10 +376,10 @@ fun ProfileScreen(
                             contentColor = MaterialTheme.colorScheme.error,
                         ),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f)),
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(52.dp),
+                            .height(48.dp),
                     ) {
                         Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
@@ -388,7 +389,7 @@ fun ProfileScreen(
                         )
                     }
 
-                    Spacer(Modifier.height(32.dp))
+                    Spacer(Modifier.height(24.dp))
 
                     // Dialogs
                     if (showEditNameDialog) {
@@ -428,22 +429,22 @@ private fun ProfileStatBox(
     modifier: Modifier = Modifier,
 ) {
     Surface(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         color = bgColor,
         border = BorderStroke(1.dp, iconColor.copy(alpha = 0.2f)),
         modifier = modifier,
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Icon(
                 icon,
                 contentDescription = null,
                 tint = iconColor,
-                modifier = Modifier.size(22.dp),
+                modifier = Modifier.size(20.dp),
             )
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(4.dp))
             Text(
                 text = value,
                 style = MaterialTheme.typography.titleSmall,
@@ -471,7 +472,7 @@ private fun ProfileInfoRow(
     ) {
         Box(
             modifier = Modifier
-                .size(36.dp)
+                .size(34.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)),
             contentAlignment = Alignment.Center,
@@ -480,10 +481,10 @@ private fun ProfileInfoRow(
                 icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(16.dp),
             )
         }
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(10.dp))
         Column {
             Text(
                 text = label,
@@ -510,13 +511,14 @@ private fun ProfileActionItem(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 48.dp)
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick)
-            .padding(vertical = 10.dp, horizontal = 4.dp),
+            .padding(vertical = 8.dp, horizontal = 4.dp),
     ) {
         Box(
             modifier = Modifier
-                .size(38.dp)
+                .size(36.dp)
                 .clip(RoundedCornerShape(10.dp))
                 .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center,
@@ -525,10 +527,10 @@ private fun ProfileActionItem(
                 icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(18.dp),
             )
         }
-        Spacer(Modifier.width(14.dp))
+        Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,

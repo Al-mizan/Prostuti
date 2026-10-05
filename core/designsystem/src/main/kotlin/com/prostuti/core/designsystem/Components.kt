@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -85,29 +86,74 @@ fun ProstutiTextField(
 }
 
 /**
- * Simple text logo for the auth screens.
+ * Official visual emblem icon for the Prostuti brand.
  */
 @Composable
-fun ProstutiLogo(modifier: Modifier = Modifier) {
+fun ProstutiEmblem(
+    modifier: Modifier = Modifier,
+    size: androidx.compose.ui.unit.Dp = 64.dp,
+) {
+    Surface(
+        modifier = modifier.size(size),
+        shape = RoundedCornerShape(size * 0.28f),
+        color = MaterialTheme.colorScheme.primary,
+        border = BorderStroke(1.5.dp, Color(0xFFFBBF24).copy(alpha = 0.6f)),
+        shadowElevation = 4.dp,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            Color(0xFF018750),
+                            Color(0xFF004D2C),
+                        ),
+                    )
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                imageVector = Icons.Default.School,
+                contentDescription = "Prostuti Crest",
+                tint = Color(0xFFFDE68A),
+                modifier = Modifier.size(size * 0.58f),
+            )
+        }
+    }
+}
+
+/**
+ * Official brand logo pairing the Prostuti emblem with typography and tagline.
+ */
+@Composable
+fun ProstutiLogo(
+    modifier: Modifier = Modifier,
+    showTagline: Boolean = true,
+) {
     Column(
-        modifier = modifier.padding(vertical = 24.dp),
+        modifier = modifier.padding(vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
+        ProstutiEmblem(size = 68.dp)
+        Spacer(Modifier.height(12.dp))
         Text(
             text = "Prostuti",
-            style = MaterialTheme.typography.displaySmall,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.primary,
             letterSpacing = (-0.5).sp,
         )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = "বিসিএস প্রিলিমিনারি পূর্ণাঙ্গ প্রস্তুতি",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontWeight = FontWeight.Medium,
-        )
+        if (showTagline) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = "বিসিএস প্রিলিমিনারি পূর্ণাঙ্গ প্রস্তুতি",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Medium,
+            )
+        }
     }
 }
 
@@ -176,9 +222,10 @@ fun ProstutiCard(
     onClick: (() -> Unit)? = null,
     containerColor: Color = MaterialTheme.colorScheme.surface,
     borderColor: Color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
+    contentPadding: androidx.compose.ui.unit.Dp = 16.dp,
     content: @Composable () -> Unit,
 ) {
-    val shape = RoundedCornerShape(20.dp)
+    val shape = RoundedCornerShape(16.dp)
     val border = BorderStroke(1.dp, borderColor)
 
     if (onClick != null) {
@@ -190,7 +237,7 @@ fun ProstutiCard(
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp, pressedElevation = 4.dp),
             modifier = modifier.fillMaxWidth(),
         ) {
-            Box(modifier = Modifier.padding(18.dp)) {
+            Box(modifier = Modifier.padding(contentPadding)) {
                 content()
             }
         }
@@ -202,7 +249,7 @@ fun ProstutiCard(
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
             modifier = modifier.fillMaxWidth(),
         ) {
-            Box(modifier = Modifier.padding(18.dp)) {
+            Box(modifier = Modifier.padding(contentPadding)) {
                 content()
             }
         }

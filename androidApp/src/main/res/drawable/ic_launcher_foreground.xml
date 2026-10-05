@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Graduation Cap / Knowledge Crown Motif in Amber Gold -->
+    <path
+        android:pathData="M54,26 L73,34 L54,42 L35,34 Z"
+        android:fillColor="#FBBF24" />
+
+    <path
+        android:pathData="M54,42 L70,35.5 L70,43 C70,49 54,54 54,54 C54,54 38,49 38,43 L38,35.5 Z"
+        android:fillColor="#F59E0B" />
+
+    <!-- Tassel string and bead -->
+    <path
+        android:pathData="M38,35.5 L34,44 L35.5,50"
+        android:strokeWidth="1.5"
+        android:strokeColor="#FDE68A"
+        android:strokeLineCap="round" />
+
+    <!-- Open Book Base - Left Page -->
+    <path
+        android:pathData="M52,58 C45,56 36,56 28,58 L28,75 C36,73 45,73 52,75 Z"
+        android:fillColor="#FFFFFF" />
+
+    <!-- Open Book Base - Right Page -->
+    <path
+        android:pathData="M56,58 C63,56 72,56 80,58 L80,75 C72,73 63,73 56,75 Z"
+        android:fillColor="#F8FAFC" />
+
+    <!-- Book Spine / Center Rib -->
+    <path
+        android:pathData="M52,58 L54,59 L56,58 L56,77 L54,78 L52,77 Z"
+        android:fillColor="#E2E8F0" />
+
+    <!-- Page Text Line Accents (Left Page) -->
+    <path
+        android:pathData="M33,63 C38,62 43,62 47,63 M33,67 C38,66 43,66 47,67 M33,71 C38,70 43,70 47,71"
+        android:strokeWidth="1.2"
+        android:strokeColor="#CBD5E1"
+        android:strokeLineCap="round" />
+
+    <!-- Page Text Line Accents (Right Page) -->
+    <path
+        android:pathData="M61,63 C65,62 70,62 75,63 M61,67 C65,66 70,66 75,67 M61,71 C65,70 70,70 75,71"
+        android:strokeWidth="1.2"
+        android:strokeColor="#CBD5E1"
+        android:strokeLineCap="round" />
+
+    <!-- Rising Achievement Star in Center -->
+    <path
+        android:pathData="M54,45 L55.5,49 L60,49.3 L56.6,52 L57.6,56.2 L54,53.8 L50.4,56.2 L51.4,52 L48,49.3 L52.5,49 Z"
+        android:fillColor="#FFFFFF" />
+</vector>
