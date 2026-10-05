@@ -26,7 +26,7 @@
     {
       "label": "3. Install & Launch Android App",
       "type": "shell",
-      "command": "./gradlew :androidApp:installDebug -PPROSTUTI_API_BASE_URL=http://localhost:5000 && adb shell am start -n com.prostuti.app/.MainActivity",
+      "command": "./gradlew :androidApp:installDebug -PPROSTUTI_API_BASE_URL=https://api-prostuti.onrender.com && adb shell am start -n com.prostuti.app/.MainActivity",
       "problemMatcher": [],
       "group": {
         "kind": "build",

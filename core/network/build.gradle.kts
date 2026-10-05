@@ -28,4 +28,6 @@ dependencies {
     api(libs.ktor.serialization.kotlinx.json)
     api(libs.ktor.client.auth)
     implementation(libs.ktor.client.logging)
+
+    testImplementation(libs.junit)
 }

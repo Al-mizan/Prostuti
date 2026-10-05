@@ -11,6 +11,8 @@ data class ApiConfig(val baseUrl: String) {
         require(baseUrl.isNotBlank()) { "ApiConfig.baseUrl must not be blank" }
     }
     companion object {
+        const val DEFAULT_BASE_URL = "https://api-prostuti.onrender.com"
+
         /**
          * Dev default for the Android emulator's host-loopback alias.
          * On a physical device, the team sets this via the buildConfigField

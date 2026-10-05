@@ -17,7 +17,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         val devBaseUrl = (project.findProperty("PROSTUTI_API_BASE_URL") as String?)
-            ?: "http://10.0.2.2:5000"
+            ?: "https://api-prostuti.onrender.com"
         buildConfigField("String", "API_BASE_URL", "\"$devBaseUrl\"")
 
         val webGoogleClientId = (project.findProperty("WEB_GOOGLE_CLIENT_ID") as String?)
