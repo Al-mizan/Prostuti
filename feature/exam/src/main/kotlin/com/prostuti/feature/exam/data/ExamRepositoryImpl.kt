@@ -9,6 +9,7 @@ import com.prostuti.core.model.ExamSessionDto
 import com.prostuti.core.model.LeaderboardEntryDto
 import com.prostuti.core.model.StartExamSessionRequest
 import com.prostuti.core.model.SubmitExamRequest
+import com.prostuti.core.network.ApiException
 import com.prostuti.core.network.ExamApi
 import com.prostuti.core.network.QuestionBankApi
 import com.prostuti.feature.exam.domain.ExamRepository
@@ -25,6 +26,8 @@ class ExamRepositoryImpl(
     override suspend fun getAvailableSessions(): Result<List<BcsSessionSummaryDto>> = try {
         val result = questionBankApi.getSessions()
         Result.Success(result)
+    } catch (e: ApiException) {
+        handleApiException(e)
     } catch (e: ClientRequestException) {
         handleClientError(e)
     } catch (e: ServerResponseException) {
@@ -48,6 +51,8 @@ class ExamRepositoryImpl(
             )
         )
         Result.Success(result)
+    } catch (e: ApiException) {
+        handleApiException(e)
     } catch (e: ClientRequestException) {
         handleClientError(e)
     } catch (e: ServerResponseException) {
@@ -68,6 +73,8 @@ class ExamRepositoryImpl(
             request = SubmitExamRequest(answers = answers, timeTakenSeconds = timeTakenSeconds)
         )
         Result.Success(result)
+    } catch (e: ApiException) {
+        handleApiException(e)
     } catch (e: ClientRequestException) {
         handleClientError(e)
     } catch (e: ServerResponseException) {
@@ -81,6 +88,8 @@ class ExamRepositoryImpl(
     override suspend fun getLeaderboard(examSession: String): Result<List<LeaderboardEntryDto>> = try {
         val result = examApi.getLeaderboard(examSession)
         Result.Success(result)
+    } catch (e: ApiException) {
+        handleApiException(e)
     } catch (e: ClientRequestException) {
         handleClientError(e)
     } catch (e: ServerResponseException) {
@@ -89,6 +98,15 @@ class ExamRepositoryImpl(
         Result.Error("Unexpected response format from server")
     } catch (e: Exception) {
         Result.Error(e.message ?: "Network error occurred")
+    }
+
+    private fun <T> handleApiException(e: ApiException): Result<T> {
+        return if (e.statusCode == 401 || e.statusCode == 403) {
+            sessionStore.clear()
+            Result.Error("Session expired. Please log in again.", cause = e)
+        } else {
+            Result.Error(e.message, cause = e)
+        }
     }
 
     private fun <T> handleClientError(e: ClientRequestException): Result<T> {

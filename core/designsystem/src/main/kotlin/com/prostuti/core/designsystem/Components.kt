@@ -7,6 +7,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,6 +52,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.scale
@@ -326,11 +329,31 @@ fun UnifiedSubjectCard(
     actionBadgeText: String? = null,
     bottomContent: (@Composable () -> Unit)? = null,
 ) {
+    val isDark = isSystemInDarkTheme()
+    val effectiveContainerColor = if (isDark) {
+        accentColor.copy(alpha = 0.12f).compositeOver(MaterialTheme.colorScheme.surface)
+    } else {
+        containerColor
+    }
+
+    val isLightContainer = effectiveContainerColor.luminance() > 0.45f
+    val titleColor = if (isLightContainer) {
+        Color(0xFF0F172A)
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
+    val subtitleColor = if (isLightContainer) {
+        Color(0xFF475569)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = containerColor,
-        border = BorderStroke(1.dp, accentColor.copy(alpha = 0.20f)),
-        shadowElevation = 1.dp,
+        color = effectiveContainerColor,
+        border = BorderStroke(1.dp, accentColor.copy(alpha = if (isDark) 0.30f else 0.20f)),
+        shadowElevation = if (isDark) 0.dp else 1.dp,
         modifier = modifier
             .fillMaxWidth()
             .height(152.dp)
@@ -351,7 +374,7 @@ fun UnifiedSubjectCard(
             ) {
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = accentColor.copy(alpha = 0.14f),
+                    color = accentColor.copy(alpha = if (isDark) 0.22f else 0.14f),
                     modifier = Modifier.size(36.dp),
                 ) {
                     Box(
@@ -369,7 +392,7 @@ fun UnifiedSubjectCard(
 
                 Surface(
                     shape = RoundedCornerShape(50),
-                    color = accentColor.copy(alpha = 0.12f),
+                    color = accentColor.copy(alpha = if (isDark) 0.20f else 0.12f),
                 ) {
                     Text(
                         text = marks,
@@ -386,7 +409,7 @@ fun UnifiedSubjectCard(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = titleColor,
                 minLines = 2,
                 maxLines = 2,
                 lineHeight = 18.sp,
@@ -407,7 +430,7 @@ fun UnifiedSubjectCard(
                             Text(
                                 text = subtitle,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = subtitleColor,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f, fill = false),
@@ -415,7 +438,7 @@ fun UnifiedSubjectCard(
                         }
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = accentColor.copy(alpha = 0.12f),
+                            color = accentColor.copy(alpha = if (isDark) 0.20f else 0.12f),
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -441,7 +464,7 @@ fun UnifiedSubjectCard(
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = subtitleColor,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )

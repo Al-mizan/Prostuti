@@ -135,10 +135,12 @@ fun parseErrorType(message: String, statusCode: Int? = null): ProstutiErrorType 
         return ProstutiErrorType.NetworkOffline
     }
 
-    // 3. Auth / Session expiration keywords
+    // 3. Auth / Session expiration keywords (strict phrases to avoid false positives on exam/practice sessions)
     val sessionKeywords = listOf(
-        "unauthorized", "unauthenticated", "session expired", "session",
-        "token expired", "invalid token", "forbidden", "401", "সেশন", "লগইন"
+        "unauthorized", "unauthenticated", "session expired", "session timeout",
+        "token expired", "invalid token", "token is invalid", "token missing",
+        "forbidden", "401", "সেশন সমাপ্ত", "সেশন মেয়াদোত্তীর্ণ", "লগইন মেয়াদোত্তীর্ণ",
+        "পুনরায় লগইন"
     )
     if (sessionKeywords.any { lower.contains(it) }) {
         return ProstutiErrorType.SessionExpired
@@ -155,7 +157,8 @@ fun parseErrorType(message: String, statusCode: Int? = null): ProstutiErrorType 
 
     // 5. Not found keywords
     val notFoundKeywords = listOf(
-        "404", "not found", "notfound", "খুঁজে পাওয়া যায়নি", "পাওয়া যায়নি"
+        "404", "not found", "notfound", "no questions", "কোনো প্রশ্ন", "কোন প্রশ্ন",
+        "খুঁজে পাওয়া যায়নি", "পাওয়া যায়নি"
     )
     if (notFoundKeywords.any { lower.contains(it) }) {
         return ProstutiErrorType.NotFound

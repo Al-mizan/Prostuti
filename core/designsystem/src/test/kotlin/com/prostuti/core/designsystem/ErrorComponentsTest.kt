@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material.icons.filled.WifiOff
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.net.ConnectException
@@ -117,6 +118,16 @@ class ErrorComponentsTest {
         assertTrue(parseErrorType("Exam 1234 not found") is ProstutiErrorType.NotFound)
         assertTrue(parseErrorType("404 Resource missing") is ProstutiErrorType.NotFound)
         assertTrue(parseErrorType("প্রশ্ন খুঁজে পাওয়া যায়নি") is ProstutiErrorType.NotFound)
+        assertTrue(parseErrorType("No questions found for session: 47th BCS Preliminary") is ProstutiErrorType.NotFound)
+        assertTrue(parseErrorType("No questions available for subject: BENGALI") is ProstutiErrorType.NotFound)
+        assertTrue(parseErrorType("কোনো প্রশ্ন পাওয়া যায়নি") is ProstutiErrorType.NotFound)
+    }
+
+    @Test
+    fun `parseErrorType does not classify session messages as SessionExpired unless auth-related`() {
+        assertFalse(parseErrorType("No questions found for session: 47th BCS Preliminary") is ProstutiErrorType.SessionExpired)
+        assertFalse(parseErrorType("Exam session 123 started") is ProstutiErrorType.SessionExpired)
+        assertFalse(parseErrorType("Practice session created successfully") is ProstutiErrorType.SessionExpired)
     }
 
     @Test

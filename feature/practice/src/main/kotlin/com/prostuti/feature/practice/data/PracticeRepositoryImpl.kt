@@ -9,6 +9,7 @@ import com.prostuti.core.model.PracticeSessionDto
 import com.prostuti.core.model.StartPracticeSessionRequest
 import com.prostuti.core.model.Subject
 import com.prostuti.core.model.SubmitPracticeAnswerRequest
+import com.prostuti.core.network.ApiException
 import com.prostuti.core.network.PracticeApi
 import com.prostuti.feature.practice.domain.PracticeRepository
 import io.ktor.client.plugins.ClientRequestException
@@ -23,13 +24,10 @@ class PracticeRepositoryImpl(
     override suspend fun startSession(subject: Subject, count: Int): Result<PracticeSessionDto> = try {
         val result = api.startSession(StartPracticeSessionRequest(subject, count))
         Result.Success(result)
+    } catch (e: ApiException) {
+        handleApiException(e)
     } catch (e: ClientRequestException) {
-        if (e.response.status.value == 401) {
-            sessionStore.clear()
-            Result.Error("Session expired. Please log in again.")
-        } else {
-            Result.Error("Failed to start practice (${e.response.status.value})")
-        }
+        handleClientError(e)
     } catch (e: ServerResponseException) {
         Result.Error("Server error: ${e.response.status.value}")
     } catch (e: SerializationException) {
@@ -45,13 +43,10 @@ class PracticeRepositoryImpl(
     ): Result<PracticeAnswerResultDto> = try {
         val result = api.submitAnswer(sessionId, SubmitPracticeAnswerRequest(questionId, selectedOption))
         Result.Success(result)
+    } catch (e: ApiException) {
+        handleApiException(e)
     } catch (e: ClientRequestException) {
-        if (e.response.status.value == 401) {
-            sessionStore.clear()
-            Result.Error("Session expired. Please log in again.")
-        } else {
-            Result.Error("Failed to submit answer (${e.response.status.value})")
-        }
+        handleClientError(e)
     } catch (e: ServerResponseException) {
         Result.Error("Server error: ${e.response.status.value}")
     } catch (e: SerializationException) {
@@ -63,18 +58,33 @@ class PracticeRepositoryImpl(
     override suspend fun finishSession(sessionId: String): Result<FinishPracticeSessionResponse> = try {
         val result = api.finishSession(sessionId)
         Result.Success(result)
+    } catch (e: ApiException) {
+        handleApiException(e)
     } catch (e: ClientRequestException) {
-        if (e.response.status.value == 401) {
-            sessionStore.clear()
-            Result.Error("Session expired. Please log in again.")
-        } else {
-            Result.Error("Failed to finish session (${e.response.status.value})")
-        }
+        handleClientError(e)
     } catch (e: ServerResponseException) {
         Result.Error("Server error: ${e.response.status.value}")
     } catch (e: SerializationException) {
         Result.Error("Unexpected response format from server")
     } catch (e: Exception) {
         Result.Error(e.message ?: "Network error occurred")
+    }
+
+    private fun <T> handleApiException(e: ApiException): Result<T> {
+        return if (e.statusCode == 401 || e.statusCode == 403) {
+            sessionStore.clear()
+            Result.Error("Session expired. Please log in again.", cause = e)
+        } else {
+            Result.Error(e.message, cause = e)
+        }
+    }
+
+    private fun <T> handleClientError(e: ClientRequestException): Result<T> {
+        return if (e.response.status.value == 401) {
+            sessionStore.clear()
+            Result.Error("Session expired. Please log in again.")
+        } else {
+            Result.Error("Failed request (${e.response.status.value})")
+        }
     }
 }
