@@ -64,6 +64,8 @@ import com.prostuti.core.designsystem.MascotPickerBottomSheet
 import com.prostuti.core.designsystem.MascotPresets
 import com.prostuti.core.designsystem.ProstutiBadge
 import com.prostuti.core.designsystem.ProstutiCard
+import com.prostuti.core.designsystem.ProstutiErrorView
+import com.prostuti.core.designsystem.parseErrorType
 import com.prostuti.core.model.Role
 import com.prostuti.core.model.UserProfileDto
 import com.prostuti.feature.profile.presentation.ProfileUiState
@@ -95,24 +97,16 @@ fun ProfileScreen(
                 }
             }
             is ProfileUiState.Error -> {
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(24.dp),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        text = state.message,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyLarge,
+                    ProstutiErrorView(
+                        errorType = parseErrorType(state.message),
+                        onAction = { viewModel.loadProfile() },
                     )
-                    Spacer(Modifier.height(16.dp))
-                    Button(onClick = { viewModel.loadProfile() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = null)
-                        Spacer(Modifier.width(8.dp))
-                        Text("পুনরায় লোড করুন")
-                    }
                 }
             }
             is ProfileUiState.Success -> {
@@ -238,13 +232,14 @@ fun ProfileScreen(
                     Spacer(Modifier.height(16.dp))
 
                     // 3-Column Performance Stats
+                    val stats = state.stats
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         ProfileStatBox(
                             title = "স্ট্রিক",
-                            value = "৩ দিন",
+                            value = "${stats.streakDays} দিন",
                             icon = Icons.Default.LocalFireDepartment,
                             iconColor = Color(0xFFEA580C),
                             bgColor = Color(0xFFFFF7ED),
@@ -252,7 +247,7 @@ fun ProfileScreen(
                         )
                         ProfileStatBox(
                             title = "মোট পয়েন্ট",
-                            value = "১২০ XP",
+                            value = "${stats.totalXp} XP",
                             icon = Icons.Default.Star,
                             iconColor = Color(0xFFD97706),
                             bgColor = Color(0xFFFEF3C7),
@@ -260,7 +255,7 @@ fun ProfileScreen(
                         )
                         ProfileStatBox(
                             title = "সঠিকতার হার",
-                            value = "৮৫%",
+                            value = "${stats.accuracyRate}%",
                             icon = Icons.Default.TrackChanges,
                             iconColor = Color(0xFF0D9488),
                             bgColor = Color(0xFFCCFBF1),

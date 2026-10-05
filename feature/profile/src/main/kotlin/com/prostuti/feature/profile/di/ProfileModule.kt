@@ -12,5 +12,5 @@ val profileModule = module {
     single<ProfileRepository> { ProfileRepositoryImpl(get(), get()) }
     factory { GetProfileUseCase(get()) }
     factory { UpdateProfileUseCase(get()) }
-    viewModel { ProfileViewModel(get(), get(), get()) }
+    viewModel { ProfileViewModel(get(), get(), get(), get()) }
 }

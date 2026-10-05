@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.prostuti.core.common.SessionStore
+import com.prostuti.core.common.UserStats
 import com.prostuti.core.designsystem.MascotAvatar
 import com.prostuti.core.designsystem.MascotPresets
 import com.prostuti.core.designsystem.ProstutiBadge
@@ -54,6 +55,15 @@ import com.prostuti.core.designsystem.ProstutiProgressBar
 import com.prostuti.core.model.Role
 import com.prostuti.feature.profile.presentation.ProfileUiState
 import com.prostuti.feature.profile.presentation.ProfileViewModel
+import java.time.DayOfWeek
+import java.time.LocalDate
+
+private fun toBanglaDigits(num: Int): String {
+    val banglaDigits = listOf('০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯')
+    return num.toString().map { char ->
+        if (char in '0'..'9') banglaDigits[char - '0'] else char
+    }.joinToString("")
+}
 
 @Composable
 fun HomeScreen(
@@ -81,6 +91,16 @@ fun HomeScreen(
     }
 
     val preset = MascotPresets.getById(avatarId)
+
+    val stats = when (val state = profileState) {
+        is ProfileUiState.Success -> state.stats
+        else -> UserStats.Empty
+    }
+
+    val level = (stats.totalXp / 100) + 1
+    val levelCurrentXp = stats.totalXp % 100
+    val levelTargetXp = 100
+    val xpProgress = (levelCurrentXp.toFloat() / levelTargetXp.toFloat()).coerceIn(0f, 1f)
 
     Column(
         modifier = modifier
@@ -183,13 +203,13 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "লেভেল ২ (অগ্রগতি)",
+                            text = "লেভেল ${toBanglaDigits(level)} (অগ্রগতি)",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
-                            text = "১২০ / ২০০ XP",
+                            text = "${toBanglaDigits(levelCurrentXp)} / ${toBanglaDigits(levelTargetXp)} XP",
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.primary,
@@ -197,7 +217,7 @@ fun HomeScreen(
                     }
                     Spacer(Modifier.height(6.dp))
                     ProstutiProgressBar(
-                        progress = 0.6f,
+                        progress = xpProgress,
                         color = MaterialTheme.colorScheme.primary,
                         trackColor = MaterialTheme.colorScheme.surfaceVariant,
                     )
@@ -236,7 +256,7 @@ fun HomeScreen(
                         Spacer(Modifier.width(12.dp))
                         Column {
                             Text(
-                                text = "৩ দিনের ধারাবাহিকতা",
+                                text = "${toBanglaDigits(stats.streakDays)} দিনের ধারাবাহিকতা",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF7C2D12),
@@ -265,7 +285,7 @@ fun HomeScreen(
                             )
                             Spacer(Modifier.width(4.dp))
                             Text(
-                                text = "+১৫ XP",
+                                text = "+${toBanglaDigits(stats.totalXp)} XP",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                             )
@@ -278,10 +298,20 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
+                    val todayDayOfWeek = LocalDate.now().dayOfWeek
+                    val todayIndex = when (todayDayOfWeek) {
+                        DayOfWeek.SATURDAY -> 0
+                        DayOfWeek.SUNDAY -> 1
+                        DayOfWeek.MONDAY -> 2
+                        DayOfWeek.TUESDAY -> 3
+                        DayOfWeek.WEDNESDAY -> 4
+                        DayOfWeek.THURSDAY -> 5
+                        DayOfWeek.FRIDAY -> 6
+                    }
                     val days = listOf("শনি", "রবি", "সোম", "মঙ্গল", "বুধ", "বৃহঃ", "শুক্র")
                     days.forEachIndexed { index, day ->
-                        val isDone = index in 0..2
-                        val isToday = index == 2
+                        val isDone = stats.weeklyActivity.getOrElse(index) { false }
+                        val isToday = index == todayIndex
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(4.dp),

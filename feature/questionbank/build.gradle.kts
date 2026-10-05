@@ -33,6 +33,7 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.activity.compose)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     // Koin for DI (SKILL.md §5)

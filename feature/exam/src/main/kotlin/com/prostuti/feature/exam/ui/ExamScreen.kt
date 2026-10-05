@@ -90,7 +90,9 @@ import androidx.compose.ui.unit.sp
 import com.prostuti.core.designsystem.ProstutiBadge
 import com.prostuti.core.designsystem.ProstutiButton
 import com.prostuti.core.designsystem.ProstutiCard
+import com.prostuti.core.designsystem.ProstutiErrorView
 import com.prostuti.core.designsystem.ProstutiProgressBar
+import com.prostuti.core.designsystem.parseErrorType
 import com.prostuti.core.model.ExamQuestionResultDto
 import com.prostuti.core.model.LeaderboardEntryDto
 import com.prostuti.core.model.Option
@@ -157,27 +159,10 @@ fun ExamScreen(
                         .padding(24.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
-                        Text(
-                            text = "একটি ত্রুটি ঘটেছে",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                        Text(
-                            text = state.message,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                        )
-                        ProstutiButton(
-                            text = "পুনরায় চেষ্টা করুন",
-                            onClick = { viewModel.onEvent(ExamUiEvent.ResetToSetup) },
-                        )
-                    }
+                    ProstutiErrorView(
+                        errorType = parseErrorType(state.message),
+                        onAction = { viewModel.onEvent(ExamUiEvent.ResetToSetup) },
+                    )
                 }
             }
 

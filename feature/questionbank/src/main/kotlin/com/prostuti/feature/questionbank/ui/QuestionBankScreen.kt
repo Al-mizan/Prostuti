@@ -1,5 +1,6 @@
 package com.prostuti.feature.questionbank.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -73,7 +74,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.prostuti.core.designsystem.ProstutiBadge
 import com.prostuti.core.designsystem.ProstutiButton
+import com.prostuti.core.designsystem.ProstutiErrorView
 import com.prostuti.core.designsystem.SubjectGridSkeleton
+import com.prostuti.core.designsystem.parseErrorType
 import com.prostuti.core.model.Option
 import com.prostuti.core.model.QuestionBankItemDto
 import com.prostuti.core.model.Subject
@@ -132,30 +135,18 @@ fun QuestionBankScreen(
                         .padding(24.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
-                        Text(
-                            text = "একটি ত্রুটি ঘটেছে",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                        Text(
-                            text = state.message,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        ProstutiButton(
-                            text = "আবার চেষ্টা করুন",
-                            onClick = { viewModel.onEvent(QuestionBankUiEvent.Retry) },
-                        )
-                    }
+                    ProstutiErrorView(
+                        errorType = parseErrorType(state.message),
+                        onAction = { viewModel.onEvent(QuestionBankUiEvent.Retry) },
+                    )
                 }
             }
 
             is QuestionBankUiState.Success -> {
+                BackHandler(enabled = state.view != QuestionBankView.HOME) {
+                    viewModel.onEvent(QuestionBankUiEvent.NavigateView(QuestionBankView.HOME))
+                }
+
                 Box(modifier = Modifier.fillMaxSize()) {
                     when (state.view) {
                         QuestionBankView.HOME -> {

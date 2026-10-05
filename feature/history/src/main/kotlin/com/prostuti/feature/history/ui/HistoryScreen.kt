@@ -64,6 +64,8 @@ import androidx.compose.ui.unit.sp
 import com.prostuti.core.designsystem.ProstutiBadge
 import com.prostuti.core.designsystem.ProstutiButton
 import com.prostuti.core.designsystem.ProstutiCard
+import com.prostuti.core.designsystem.ProstutiErrorView
+import com.prostuti.core.designsystem.parseErrorType
 import com.prostuti.core.model.Option
 import com.prostuti.core.model.SessionType
 import com.prostuti.core.model.Subject
@@ -122,16 +124,11 @@ fun HistoryScreen(
                     }
                 }
                 is HistoryUiState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier.padding(24.dp),
-                        ) {
-                            Text(text = "তথ্য লোড করা যায়নি", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error)
-                            Text(text = state.message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            ProstutiButton(text = "পুনরায় চেষ্টা করুন", onClick = { viewModel.loadData() })
-                        }
+                    Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+                        ProstutiErrorView(
+                            errorType = parseErrorType(state.message),
+                            onAction = { viewModel.loadData() },
+                        )
                     }
                 }
                 is HistoryUiState.Content -> {

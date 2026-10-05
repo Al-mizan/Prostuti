@@ -3,6 +3,8 @@ package com.prostuti.feature.profile.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.prostuti.core.common.Result
+import com.prostuti.core.common.UserStatsCalculator
+import com.prostuti.feature.history.domain.GetUserAttemptsUseCase
 import com.prostuti.feature.profile.domain.GetProfileUseCase
 import com.prostuti.feature.profile.domain.ProfileRepository
 import com.prostuti.feature.profile.domain.UpdateProfileUseCase
@@ -14,6 +16,7 @@ import kotlinx.coroutines.launch
 class ProfileViewModel(
     private val getProfileUseCase: GetProfileUseCase,
     private val updateProfileUseCase: UpdateProfileUseCase,
+    private val getUserAttemptsUseCase: GetUserAttemptsUseCase,
     private val repository: ProfileRepository,
 ) : ViewModel() {
 
@@ -29,11 +32,32 @@ class ProfileViewModel(
             _uiState.value = ProfileUiState.Loading
             when (val result = getProfileUseCase()) {
                 is Result.Success -> {
-                    _uiState.value = ProfileUiState.Success(profile = result.value)
+                    val attempts = when (val attemptsResult = getUserAttemptsUseCase()) {
+                        is Result.Success -> attemptsResult.value
+                        else -> emptyList()
+                    }
+                    val stats = UserStatsCalculator.calculate(attempts)
+                    _uiState.value = ProfileUiState.Success(
+                        profile = result.value,
+                        stats = stats,
+                    )
                 }
                 is Result.Error -> {
                     _uiState.value = ProfileUiState.Error(message = result.message)
                 }
+            }
+        }
+    }
+
+    fun refreshStats() {
+        val currentState = _uiState.value as? ProfileUiState.Success ?: return
+        viewModelScope.launch {
+            when (val attemptsResult = getUserAttemptsUseCase()) {
+                is Result.Success -> {
+                    val stats = UserStatsCalculator.calculate(attemptsResult.value)
+                    _uiState.value = currentState.copy(stats = stats)
+                }
+                else -> Unit
             }
         }
     }
@@ -44,7 +68,11 @@ class ProfileViewModel(
             _uiState.value = currentState.copy(isUpdating = true, errorMessage = null)
             when (val result = updateProfileUseCase(name = newName, avatarId = currentState.profile.avatarId)) {
                 is Result.Success -> {
-                    _uiState.value = ProfileUiState.Success(profile = result.value)
+                    _uiState.value = currentState.copy(
+                        profile = result.value,
+                        isUpdating = false,
+                        errorMessage = null,
+                    )
                 }
                 is Result.Error -> {
                     _uiState.value = currentState.copy(
@@ -62,7 +90,11 @@ class ProfileViewModel(
             _uiState.value = currentState.copy(isUpdating = true, errorMessage = null)
             when (val result = updateProfileUseCase(name = currentState.profile.name, avatarId = newAvatarId)) {
                 is Result.Success -> {
-                    _uiState.value = ProfileUiState.Success(profile = result.value)
+                    _uiState.value = currentState.copy(
+                        profile = result.value,
+                        isUpdating = false,
+                        errorMessage = null,
+                    )
                 }
                 is Result.Error -> {
                     _uiState.value = currentState.copy(
@@ -76,5 +108,6 @@ class ProfileViewModel(
 
     fun logout() {
         repository.clearSession()
+        _uiState.value = ProfileUiState.Loading
     }
 }

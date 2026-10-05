@@ -1,8 +1,11 @@
 package com.prostuti.app.ui
 
+import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -11,19 +14,30 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import com.prostuti.core.common.SessionStore
 import com.prostuti.feature.practice.presentation.PracticeViewModel
 import com.prostuti.feature.practice.ui.PracticeScreen
@@ -54,6 +68,36 @@ fun MainScreen(
     modifier: Modifier = Modifier,
 ) {
     var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
+    val tabBackStack = rememberSaveable(
+        saver = listSaver(
+            save = { it.toList() },
+            restore = { it.toMutableStateList() }
+        )
+    ) {
+        mutableStateListOf(0)
+    }
+    var showExitDialog by rememberSaveable { mutableStateOf(false) }
+
+    fun selectTab(index: Int) {
+        if (selectedTabIndex != index) {
+            selectedTabIndex = index
+            tabBackStack.add(index)
+        }
+    }
+
+    BackHandler {
+        if (tabBackStack.size > 1) {
+            tabBackStack.removeAt(tabBackStack.lastIndex)
+            selectedTabIndex = tabBackStack.last()
+        } else if (selectedTabIndex != 0) {
+            selectedTabIndex = 0
+            tabBackStack.clear()
+            tabBackStack.add(0)
+        } else {
+            showExitDialog = true
+        }
+    }
+
     val profileViewModel: ProfileViewModel = koinViewModel()
     val questionBankViewModel: QuestionBankViewModel = koinViewModel()
     val practiceViewModel: PracticeViewModel = koinViewModel()
@@ -69,7 +113,7 @@ fun MainScreen(
                     val isSelected = selectedTabIndex == index
                     NavigationBarItem(
                         selected = isSelected,
-                        onClick = { selectedTabIndex = index },
+                        onClick = { selectTab(index) },
                         icon = {
                             Icon(
                                 if (isSelected) tab.selectedIcon else tab.unselectedIcon,
@@ -91,11 +135,11 @@ fun MainScreen(
                 0 -> HomeScreen(
                     sessionStore = sessionStore,
                     profileViewModel = profileViewModel,
-                    onNavigateToPractice = { selectedTabIndex = 1 },
-                    onNavigateToQuestionBank = { selectedTabIndex = 2 },
+                    onNavigateToPractice = { selectTab(1) },
+                    onNavigateToQuestionBank = { selectTab(2) },
                     onNavigateToExam = onNavigateToExam,
                     onNavigateToHistory = onNavigateToHistory,
-                    onNavigateToProfile = { selectedTabIndex = 3 },
+                    onNavigateToProfile = { selectTab(3) },
                     onNavigateToAdmin = onNavigateToAdmin,
                 )
                 1 -> PracticeScreen(viewModel = practiceViewModel)
@@ -110,5 +154,51 @@ fun MainScreen(
                 )
             }
         }
+    }
+
+    if (showExitDialog) {
+        val context = LocalContext.current
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false },
+            title = {
+                Text(
+                    text = "অ্যাপ বন্ধ করতে চান?",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+            },
+            text = {
+                Text(
+                    text = "আপনি কি নিশ্চিতভাবে Prostuti অ্যাপ থেকে বের হতে চান?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showExitDialog = false
+                        (context as? Activity)?.finish()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError,
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                ) {
+                    Text("হ্যাঁ, বের হন", fontWeight = FontWeight.SemiBold)
+                }
+            },
+            dismissButton = {
+                OutlinedButton(
+                    onClick = { showExitDialog = false },
+                    shape = RoundedCornerShape(12.dp),
+                ) {
+                    Text("না", fontWeight = FontWeight.SemiBold)
+                }
+            },
+            shape = RoundedCornerShape(20.dp),
+            containerColor = MaterialTheme.colorScheme.surface,
+        )
     }
 }
