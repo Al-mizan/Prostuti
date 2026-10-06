@@ -422,9 +422,9 @@ fun HomeScreen(
 
         // Live Model Test Card (replaces Timed Mock Exam Card)
         DashboardActionCard(
-            title = "বিসিএস লাইভ মডেল টেস্ট",
+            title = "লাইভ মডেল টেস্ট",
             subtitle = "১৫ দিনব্যাপী ২০০ নম্বরের পূর্ণাঙ্গ লাইভ পরীক্ষা ও মেধা তালিকা",
-            badgeText = "লাইভ চলছে",
+            badgeText = "লাইভ",
             icon = Icons.Default.Timer,
             iconColor = Color(0xFFDC143C),
             iconBgColor = Color(0xFFFFE4E6),
