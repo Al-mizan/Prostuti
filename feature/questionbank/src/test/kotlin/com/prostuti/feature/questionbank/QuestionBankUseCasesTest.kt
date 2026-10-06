@@ -166,4 +166,29 @@ class QuestionBankUseCasesTest {
             ?: sessions.first().sessionName
         assertEquals("47th BCS Preliminary", selected)
     }
+
+    @Test
+    fun `bcs session edition number extraction correctly parses preliminary editions`() {
+        val sessionNames = listOf("50th BCS Preliminary", "49th BCS Preliminary", "48th BCS", "BCS Special")
+        val numbers = sessionNames.map { Regex("""\d+""").find(it)?.value ?: "BCS" }
+        assertEquals(listOf("50", "49", "48", "BCS"), numbers)
+    }
+
+    @Test
+    fun `Live Model Test session name mapping provides non-empty target for exam start`() {
+        val liveModelTest = ModelTestDto(
+            id = "mt-live",
+            title = "৪৭তম বিসিএস বিশেষ লাইভ মডেল টেস্ট",
+            examSession = "47th BCS Preliminary",
+            durationMinutes = 120,
+            totalMarks = 200.0,
+            totalQuestions = 200,
+            startTime = "2026-10-01T00:00:00Z",
+            endTime = "2026-10-20T00:00:00Z",
+            status = ModelTestStatus.LIVE,
+        )
+        val targetSession = liveModelTest.examSession.ifBlank { liveModelTest.title }
+        assertEquals("47th BCS Preliminary", targetSession)
+        assertEquals(ModelTestStatus.LIVE, liveModelTest.status)
+    }
 }

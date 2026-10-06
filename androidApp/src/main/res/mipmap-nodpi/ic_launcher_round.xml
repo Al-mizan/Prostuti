@@ -5,68 +5,128 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
+    <!-- Authentic emerald green gradient flowing 135 degrees from #018750 to #004D2C -->
     <path
         android:pathData="M0,0h108v108h-108z">
         <aapt:attr name="android:fillColor">
             <gradient
                 android:angle="135"
-                android:endColor="#004D2C"
+                android:startX="0"
+                android:startY="0"
+                android:endX="108"
+                android:endY="108"
                 android:startColor="#018750"
+                android:endColor="#004D2C"
                 android:type="linear" />
         </aapt:attr>
     </path>
-    <!-- Soft circular decorative glow -->
-    <path
-        android:pathData="M54,54m-42,0a42,42 0,1 1,84 0a42,42 0,1 1,-84 0"
-        android:fillColor="#0DFFFFFF" />
 
-    <!-- Graduation Cap / Knowledge Crown Motif in Amber Gold -->
+    <!-- Subtle radial center illumination -->
     <path
-        android:pathData="M54,26 L73,34 L54,42 L35,34 Z"
-        android:fillColor="#FBBF24" />
+        android:pathData="M54,54m-42,0a42,42 0,1 1,84 0a42,42 0,1 1,-84 0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:centerX="54"
+                android:centerY="54"
+                android:gradientRadius="42"
+                android:startColor="#20FFFFFF"
+                android:endColor="#00FFFFFF"
+                android:type="radial" />
+        </aapt:attr>
+    </path>
 
+    <!-- 1. Ambient Drop Shadow (Elevation & Depth onto emerald gradient) -->
+    <!-- Soft Outer Shadow -->
     <path
-        android:pathData="M54,42 L70,35.5 L70,43 C70,49 54,54 54,54 C54,54 38,49 38,43 L38,35.5 Z"
+        android:pathData="M36.8,60.5 L36.8,70.3 L54,79.7 L71.2,70.3 L71.2,60.5 L54,69.9 Z"
+        android:fillColor="#24001A0D" />
+    <path
+        android:pathData="M54,35.6 L27,50.3 L54,65 L76.1,52.9 L76.1,70.4 L81.2,70.4 L81,50.3 Z"
+        android:fillColor="#24001A0D" />
+
+    <!-- Crisp Key Shadow -->
+    <path
+        android:pathData="M36.8,58.9 L36.8,68.7 L54,78.1 L71.2,68.7 L71.2,58.9 L54,68.3 Z"
+        android:fillColor="#3D001F10" />
+    <path
+        android:pathData="M54,34 L27,48.7 L54,63.4 L76.1,51.3 L76.1,68.8 L81.2,68.8 L81,48.7 Z"
+        android:fillColor="#3D001F10" />
+
+    <!-- 2. Skull Cap / Headband (Lower Arch) -->
+    <!-- Headband Left Shaded Facet -->
+    <path
+        android:pathData="M36.8,56.9 L36.8,66.7 L54,76.1 L54,66.3 Z"
+        android:fillColor="#D97706" />
+
+    <!-- Headband Right Main Facet -->
+    <path
+        android:pathData="M54,66.3 L54,76.1 L71.2,66.7 L71.2,56.9 Z"
         android:fillColor="#F59E0B" />
 
-    <!-- Tassel string and bead -->
+    <!-- Headband Bottom Rim Gold Highlight -->
     <path
-        android:pathData="M38,35.5 L34,44 L35.5,50"
-        android:strokeWidth="1.5"
+        android:pathData="M36.8,66.7 L54,76.1 L71.2,66.7"
+        android:strokeWidth="1.8"
         android:strokeColor="#FDE68A"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- 3. Mortarboard Diamond (Knowledge Crown) -->
+    <!-- Left Facet (Amber Gold Body) -->
+    <path
+        android:pathData="M54,32 L27,46.7 L54,61.4 Z"
+        android:fillColor="#FBBF24" />
+
+    <!-- Right Facet (Cream Gold Highlight) -->
+    <path
+        android:pathData="M54,32 L81,46.7 L54,61.4 Z"
+        android:fillColor="#FDE68A" />
+
+    <!-- Golden Perimeter Border & Knowledge Peak Contour -->
+    <path
+        android:pathData="M54,32 L27,46.7 L54,61.4 L81,46.7 Z"
+        android:strokeWidth="1.6"
+        android:strokeColor="#FEF3C7"
+        android:strokeLineJoin="round" />
+
+    <!-- Center Ridge Highlight Line (Apex to Bottom Vertex) -->
+    <path
+        android:pathData="M54,32 L54,61.4"
+        android:strokeWidth="1.1"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeAlpha="0.75" />
+
+    <!-- 4. Hanging Tassel & Cord -->
+    <!-- Tassel Cord Draping From Center Button to Right Corner -->
+    <path
+        android:pathData="M54,46.7 Q68,46.2 81,47.5"
+        android:strokeWidth="1.4"
+        android:strokeColor="#F59E0B"
         android:strokeLineCap="round" />
 
-    <!-- Open Book Base - Left Page -->
+    <!-- Hanging Tassel Body -->
     <path
-        android:pathData="M52,58 C45,56 36,56 28,58 L28,75 C36,73 45,73 52,75 Z"
-        android:fillColor="#FFFFFF" />
+        android:pathData="M76.1,49.3 L76.1,66.8 L81.2,66.8 L81,46.7 Z"
+        android:fillColor="#FBBF24" />
 
-    <!-- Open Book Base - Right Page -->
+    <!-- Tassel Ring Accent in Deep Amber -->
     <path
-        android:pathData="M56,58 C63,56 72,56 80,58 L80,75 C72,73 63,73 56,75 Z"
-        android:fillColor="#F8FAFC" />
+        android:pathData="M75.3,50.8 L81.8,50.8 L81.8,52.2 L75.3,52.2 Z"
+        android:fillColor="#D97706" />
 
-    <!-- Book Spine / Center Rib -->
+    <!-- Tassel Outer Highlight Edge -->
     <path
-        android:pathData="M52,58 L54,59 L56,58 L56,77 L54,78 L52,77 Z"
-        android:fillColor="#E2E8F0" />
-
-    <!-- Page Text Line Accents (Left Page) -->
-    <path
-        android:pathData="M33,63 C38,62 43,62 47,63 M33,67 C38,66 43,66 47,67 M33,71 C38,70 43,70 47,71"
+        android:pathData="M81,46.7 L81.2,66.8 L76.1,66.8"
         android:strokeWidth="1.2"
-        android:strokeColor="#CBD5E1"
-        android:strokeLineCap="round" />
+        android:strokeColor="#FEF3C7"
+        android:strokeLineJoin="round" />
 
-    <!-- Page Text Line Accents (Right Page) -->
+    <!-- 5. Center Knowledge Peak Button / Pip -->
     <path
-        android:pathData="M61,63 C65,62 70,62 75,63 M61,67 C65,66 70,66 75,67 M61,71 C65,70 70,70 75,71"
-        android:strokeWidth="1.2"
-        android:strokeColor="#CBD5E1"
-        android:strokeLineCap="round" />
+        android:pathData="M54,44.4 A2.3,2.3 0 1,1 53.99,44.4 Z"
+        android:fillColor="#FEF3C7"
+        android:strokeWidth="0.8"
+        android:strokeColor="#D97706" />
 
-    <!-- Rising Achievement Star in Center -->
-    <path
-        android:pathData="M54,45 L55.5,49 L60,49.3 L56.6,52 L57.6,56.2 L54,53.8 L50.4,56.2 L51.4,52 L48,49.3 L52.5,49 Z"
-        android:fillColor="#FFFFFF" />
 </vector>

@@ -624,7 +624,7 @@ fun MascotPickerBottomSheet(
                         Text(
                             text = highlightedPreset.quoteBangla,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            color = Color.Black,
                         )
                     }
                 }

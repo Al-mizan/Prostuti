@@ -46,6 +46,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.prostuti.core.designsystem.ProstutiCrimson
+import com.prostuti.core.designsystem.ProstutiCrimsonContainer
 import com.prostuti.core.model.BcsSessionSummaryDto
 
 /**
@@ -177,7 +179,6 @@ private fun BcsSessionRowCard(
     onClick: () -> Unit,
 ) {
     val bcsNumber = Regex("""\d+""").find(session.sessionName)?.value ?: ""
-    val isShortExam = session.durationMinutes <= 60
 
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -202,10 +203,10 @@ private fun BcsSessionRowCard(
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.weight(1f),
             ) {
-                // Edition number circular avatar
+                // Edition number circular avatar (Unified Crimson Red)
                 Surface(
                     shape = CircleShape,
-                    color = if (isShortExam) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
+                    color = ProstutiCrimsonContainer,
                     modifier = Modifier.size(46.dp),
                 ) {
                     Box(
@@ -216,7 +217,7 @@ private fun BcsSessionRowCard(
                             text = if (bcsNumber.isNotBlank()) bcsNumber.toIntOrNull()?.toBanglaDigits() ?: bcsNumber else "BCS",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = if (isShortExam) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = ProstutiCrimson,
                         )
                     }
                 }

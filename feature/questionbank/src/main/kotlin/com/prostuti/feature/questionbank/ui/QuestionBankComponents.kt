@@ -67,6 +67,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.prostuti.core.designsystem.ProstutiCrimson
+import com.prostuti.core.designsystem.ProstutiCrimsonContainer
+import com.prostuti.core.designsystem.ProstutiCrimsonDark
+import com.prostuti.core.designsystem.ProstutiCrimsonLight
 import com.prostuti.core.designsystem.UnifiedSubjectCard
 import com.prostuti.core.model.ModelTestDto
 import com.prostuti.core.model.ModelTestStatus
@@ -219,7 +223,8 @@ fun LiveModelTestBannerCard(
                             Color(0xFF020617),
                         )
                     )
-                ),
+                )
+                .clickable(onClick = onBrowseAll),
         ) {
             Column(
                 modifier = Modifier
@@ -326,7 +331,7 @@ fun LiveModelTestBannerCard(
     val isUpcoming = liveTest.status == ModelTestStatus.UPCOMING
 
     val gradientColors = when {
-        isLive -> listOf(Color(0xFF881337), Color(0xFF4C0519), Color(0xFF1E0108))
+        isLive -> listOf(Color(0xFFFFF1F2), Color(0xFFFFE4E6))
         isUpcoming -> listOf(Color(0xFF1E3A8A), Color(0xFF172554), Color(0xFF0F172A))
         else -> listOf(Color(0xFF334155), Color(0xFF1E293B), Color(0xFF0F172A))
     }
@@ -342,11 +347,19 @@ fun LiveModelTestBannerCard(
     Card(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isLive) 6.dp else 4.dp),
+        border = if (isLive) BorderStroke(1.5.dp, ProstutiCrimson) else null,
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(Brush.linearGradient(colors = gradientColors)),
+            .background(Brush.linearGradient(colors = gradientColors))
+            .clickable {
+                if (isLive) {
+                    onJoinExam(liveTest.examSession.ifBlank { liveTest.title })
+                } else {
+                    onBrowseAll()
+                }
+            },
     ) {
         Column(
             modifier = Modifier
@@ -362,10 +375,11 @@ fun LiveModelTestBannerCard(
                 Surface(
                     shape = RoundedCornerShape(12.dp),
                     color = when {
-                        isLive -> Color(0xFFDC2626)
+                        isLive -> ProstutiCrimson
                         isUpcoming -> Color(0xFF2563EB)
                         else -> Color(0xFF475569)
                     },
+                    shadowElevation = if (isLive) 3.dp else 0.dp,
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
@@ -373,17 +387,27 @@ fun LiveModelTestBannerCard(
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
                         if (isLive) {
-                            // Pulsing dot
+                            // Pulsing dot with glowing halo
                             Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .graphicsLayer {
-                                        scaleX = pulseScale
-                                        scaleY = pulseScale
-                                        alpha = pulseAlpha
-                                    }
-                                    .background(Color.White, CircleShape)
-                            )
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.size(12.dp),
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(12.dp)
+                                        .graphicsLayer {
+                                            scaleX = pulseScale
+                                            scaleY = pulseScale
+                                            alpha = pulseAlpha * 0.5f
+                                        }
+                                        .background(Color.White.copy(alpha = 0.5f), CircleShape)
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(7.dp)
+                                        .background(Color.White, CircleShape)
+                                )
+                            }
                         } else {
                             Icon(
                                 imageVector = if (isUpcoming) Icons.Default.AccessTime else Icons.Default.CheckCircle,
@@ -394,7 +418,7 @@ fun LiveModelTestBannerCard(
                         }
                         Text(
                             text = when {
-                                isLive -> "লাইভ পরীক্ষা চলমান"
+                                isLive -> "লাইভ চলছে"
                                 isUpcoming -> "আসন্ন পরীক্ষা"
                                 else -> "আর্কাইভ পরীক্ষা"
                             },
@@ -407,7 +431,8 @@ fun LiveModelTestBannerCard(
 
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = Color.White.copy(alpha = 0.18f),
+                    color = if (isLive) ProstutiCrimsonContainer else Color.White.copy(alpha = 0.18f),
+                    border = if (isLive) BorderStroke(1.dp, ProstutiCrimson.copy(alpha = 0.25f)) else null,
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -417,14 +442,14 @@ fun LiveModelTestBannerCard(
                         Icon(
                             imageVector = Icons.Default.Timer,
                             contentDescription = null,
-                            tint = Color(0xFFFDE047),
+                            tint = if (isLive) ProstutiCrimson else Color(0xFFFDE047),
                             modifier = Modifier.size(13.dp),
                         )
                         Text(
                             text = countdownText,
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color.White,
+                            color = if (isLive) ProstutiCrimsonDark else Color.White,
                         )
                     }
                 }
@@ -436,7 +461,7 @@ fun LiveModelTestBannerCard(
                 text = liveTest.title,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = if (isLive) ProstutiCrimsonDark else Color.White,
             )
 
             Spacer(Modifier.height(4.dp))
@@ -445,7 +470,7 @@ fun LiveModelTestBannerCard(
                 text = liveTest.description?.takeIf { it.isNotBlank() }
                     ?: "${liveTest.examSession} • পূর্ণাঙ্গ সিলেবাস • রিয়েল-টাইম ফলাফল ও ব্যাখ্যা",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFFF1F5F9),
+                color = if (isLive) Color(0xFF475569) else Color(0xFFF1F5F9),
             )
 
             Spacer(Modifier.height(16.dp))
@@ -463,13 +488,13 @@ fun LiveModelTestBannerCard(
                     Icon(
                         imageVector = Icons.Default.Timer,
                         contentDescription = null,
-                        tint = Color(0xFFFDE047),
+                        tint = if (isLive) ProstutiCrimson else Color(0xFFFDE047),
                         modifier = Modifier.size(16.dp),
                     )
                     Text(
                         text = "${liveTest.durationMinutes.toBanglaDigits()} মিনিট",
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color.White,
+                        color = if (isLive) Color(0xFF1E293B) else Color.White,
                         fontWeight = FontWeight.SemiBold,
                     )
                 }
@@ -481,13 +506,13 @@ fun LiveModelTestBannerCard(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.HelpOutline,
                         contentDescription = null,
-                        tint = Color(0xFF93C5FD),
+                        tint = if (isLive) ProstutiCrimson else Color(0xFF93C5FD),
                         modifier = Modifier.size(16.dp),
                     )
                     Text(
                         text = "${liveTest.totalQuestions.toBanglaDigits()} প্রশ্ন • ${liveTest.totalMarks.toInt().toBanglaDigits()} নম্বর",
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color.White,
+                        color = if (isLive) Color(0xFF1E293B) else Color.White,
                         fontWeight = FontWeight.SemiBold,
                     )
                 }
@@ -498,20 +523,21 @@ fun LiveModelTestBannerCard(
             Button(
                 onClick = {
                     if (isLive) {
-                        onJoinExam(liveTest.examSession)
+                        onJoinExam(liveTest.examSession.ifBlank { liveTest.title })
                     } else {
                         onBrowseAll()
                     }
                 },
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isLive) Color(0xFFE11D48) else MaterialTheme.colorScheme.primary,
+                    containerColor = if (isLive) ProstutiCrimson else MaterialTheme.colorScheme.primary,
                     contentColor = Color.White,
                 ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
-                    text = if (isLive) "পরীক্ষায় অংশগ্রহণ করুন" else "বিস্তারিত ও সূচি দেখুন",
+                    text = if (isLive) "পরীক্ষায় অংশ নিন" else "বিস্তারিত ও সূচি দেখুন",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
                 )

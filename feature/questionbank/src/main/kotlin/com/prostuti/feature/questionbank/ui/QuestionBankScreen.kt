@@ -83,7 +83,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.prostuti.core.designsystem.ProstutiBadge
 import com.prostuti.core.designsystem.ProstutiButton
+import com.prostuti.core.designsystem.ProstutiCrimson
 import com.prostuti.core.designsystem.ProstutiErrorView
+import com.prostuti.core.designsystem.ProstutiMathText
 import com.prostuti.core.designsystem.SubjectGridSkeleton
 import com.prostuti.core.designsystem.parseErrorType
 import com.prostuti.core.model.Option
@@ -378,11 +380,12 @@ private fun QuestionBankContent(
 
             Spacer(Modifier.height(12.dp))
 
+            //! no need the subject filter bar
             // Subject Filter Bar (Horizontal Scroll)
-            SubjectFilterBar(
-                selectedSubject = state.selectedSubject,
-                onSelectSubject = { onEvent(QuestionBankUiEvent.SelectSubject(it)) },
-            )
+            // SubjectFilterBar(
+            //     selectedSubject = state.selectedSubject,
+            //     onSelectSubject = { onEvent(QuestionBankUiEvent.SelectSubject(it)) },
+            // )
 
             if (state.isRefreshingQuestions) {
                 Spacer(Modifier.height(6.dp))
@@ -685,7 +688,7 @@ private fun QuestionStudyCard(
             Spacer(Modifier.height(12.dp))
 
             // Question Text
-            Text(
+            ProstutiMathText(
                 text = question.questionText,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
@@ -769,7 +772,7 @@ private fun QuestionStudyCard(
 
                             Spacer(Modifier.width(10.dp))
 
-                            Text(
+                            ProstutiMathText(
                                 text = optionText,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = contentColor,
@@ -792,8 +795,7 @@ private fun QuestionStudyCard(
             }
 
             // Explanation Toggle Button & Content
-            val explanation = question.explanation
-            if (!explanation.isNullOrBlank()) {
+            if (isAnswered) {
                 Spacer(Modifier.height(10.dp))
 
                 Row(
@@ -811,7 +813,7 @@ private fun QuestionStudyCard(
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        text = if (isExplanationExpanded) "ব্যাখ্যা লুকান" else "ব্যাখ্যা দেখুন",
+                        text = if (isExplanationExpanded) "ব্যাখ্যা বন্ধ করুন" else "ব্যাখ্যা দেখুন",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = if (isExplanationExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -855,12 +857,22 @@ private fun QuestionStudyCard(
                                 )
                             }
                             Spacer(Modifier.height(6.dp))
-                            Text(
-                                text = explanation,
-                                style = MaterialTheme.typography.bodySmall,
-                                lineHeight = 20.sp,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
+                            val explanation = question.explanation
+                            if (!explanation.isNullOrBlank()) {
+                                ProstutiMathText(
+                                    text = explanation,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    lineHeight = 20.sp,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                            } else {
+                                ProstutiMathText(
+                                    text = "এই প্রশ্নের বিশদ ব্যাখ্যা শীঘ্রই যুক্ত করা হবে।",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    lineHeight = 20.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
                     }
                 }
@@ -1123,10 +1135,16 @@ private fun ModelTestCatalogItemCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(
             1.dp,
-            if (isLive) Color(0xFFDC2626).copy(alpha = 0.4f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+            if (isLive) ProstutiCrimson.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isLive) 3.dp else 1.dp),
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable {
+                if (isLive) {
+                    onTakeExam()
+                }
+            },
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
             // Header: Status Badge & Session
@@ -1138,7 +1156,7 @@ private fun ModelTestCatalogItemCard(
                 Surface(
                     shape = RoundedCornerShape(8.dp),
                     color = when {
-                        isLive -> Color(0xFFDC2626)
+                        isLive -> ProstutiCrimson
                         isUpcoming -> Color(0xFF2563EB)
                         else -> MaterialTheme.colorScheme.surfaceVariant
                     },
@@ -1262,7 +1280,7 @@ private fun ModelTestCatalogItemCard(
                     onClick = onTakeExam,
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isLive) Color(0xFFDC2626) else MaterialTheme.colorScheme.primary,
+                        containerColor = if (isLive) ProstutiCrimson else MaterialTheme.colorScheme.primary,
                         contentColor = Color.White,
                     ),
                     modifier = Modifier.fillMaxWidth(),

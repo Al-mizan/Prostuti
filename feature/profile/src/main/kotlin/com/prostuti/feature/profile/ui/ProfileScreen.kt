@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.TrackChanges
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -43,6 +44,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -368,11 +370,12 @@ fun ProfileScreen(
 
                     Spacer(Modifier.height(20.dp))
 
+                    var showLogoutConfirmDialog by remember { mutableStateOf(false) }
+
                     // Logout Button
                     OutlinedButton(
                         onClick = {
-                            viewModel.logout()
-                            onLoggedOut()
+                            showLogoutConfirmDialog = true
                         },
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = MaterialTheme.colorScheme.error,
@@ -394,6 +397,32 @@ fun ProfileScreen(
                     Spacer(Modifier.height(24.dp))
 
                     // Dialogs
+                    if (showLogoutConfirmDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showLogoutConfirmDialog = false },
+                            title = { Text("প্রস্থান নিশ্চিতকরণ") },
+                            text = { Text("আপনি কি নিশ্চিত আপনি অ্যাকাউন্ট থেকে প্রস্থান করতে চান?") },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        showLogoutConfirmDialog = false
+                                        viewModel.logout()
+                                        onLoggedOut()
+                                    },
+                                ) {
+                                    Text("হ্যাঁ")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(
+                                    onClick = { showLogoutConfirmDialog = false },
+                                ) {
+                                    Text("না")
+                                }
+                            },
+                        )
+                    }
+
                     if (showEditNameDialog) {
                         EditNameDialog(
                             currentName = profile.name,

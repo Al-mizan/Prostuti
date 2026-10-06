@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -94,6 +95,7 @@ import com.prostuti.core.designsystem.ProstutiBadge
 import com.prostuti.core.designsystem.ProstutiButton
 import com.prostuti.core.designsystem.ProstutiCard
 import com.prostuti.core.designsystem.ProstutiErrorView
+import com.prostuti.core.designsystem.ProstutiMathText
 import com.prostuti.core.designsystem.ProstutiProgressBar
 import com.prostuti.core.designsystem.parseErrorType
 import com.prostuti.core.model.ExamQuestionResultDto
@@ -482,11 +484,16 @@ private fun ActiveExamContent(
     Scaffold(
         topBar = {
             Surface(
+                modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.surface,
                 border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
                 shadowElevation = 2.dp,
             ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding(),
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -534,7 +541,7 @@ private fun ActiveExamContent(
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = "${state.answeredCount.toBanglaDigits()}/${state.totalQuestions.toBanglaDigits()}",
+                                text = "${(state.currentIndex + 1).toBanglaDigits()}/${state.totalQuestions.toBanglaDigits()}",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                             )
@@ -675,7 +682,7 @@ private fun ActiveExamContent(
             }
 
             // Question Text
-            Text(
+            ProstutiMathText(
                 text = question.questionText,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
@@ -716,11 +723,11 @@ private fun ActiveExamContent(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(30.dp)
-                                    .background(
-                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                                        shape = CircleShape,
-                                    ),
+                                .size(30.dp)
+                                .background(
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                                    shape = CircleShape,
+                                ),
                                 contentAlignment = Alignment.Center,
                             ) {
                                 Text(
@@ -733,7 +740,7 @@ private fun ActiveExamContent(
 
                             Spacer(Modifier.width(14.dp))
 
-                            Text(
+                            ProstutiMathText(
                                 text = optionText,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
