@@ -61,7 +61,9 @@ object MathTextFormatter {
             if (denEnd == -1) break
             val num = s.substring(start + 6, numEnd).trim()
             val den = s.substring(denStart + 1, denEnd).trim()
-            s = s.substring(0, start) + "(${num}/${den})" + s.substring(denEnd + 1)
+            val isSimpleToken = num.matches(Regex("""^[0-9০-৯a-zA-Z]+$""")) && den.matches(Regex("""^[0-9০-৯a-zA-Z]+$"""))
+            val formattedFrac = if (isSimpleToken) "$num/$den" else "(${num}/${den})"
+            s = s.substring(0, start) + formattedFrac + s.substring(denEnd + 1)
         }
         return s
     }
@@ -115,6 +117,8 @@ object MathTextFormatter {
             .replace("\\pm", "±")
             .replace("\\mp", "∓")
             .replace("\\cdot", "·")
+            .replace(Regex("""\^\{?\\circ\}?"""), "°")
+            .replace("\\circ", "°")
             .replace("\\degree", "°")
             .replace("\\angle", "∠")
             .replace("\\triangle", "△")
