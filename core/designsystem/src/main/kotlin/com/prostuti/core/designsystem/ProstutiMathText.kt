@@ -18,6 +18,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 
+import androidx.compose.ui.unit.em
+
 /**
  * Robust Math & Bangla Typography Formatter for Prostuti.
  * Converts LaTeX formulas ($...$), superscripts, subscripts, radicals, fractions,
@@ -26,19 +28,66 @@ import androidx.compose.ui.unit.TextUnit
  */
 object MathTextFormatter {
 
-    private val superscriptMap = mapOf(
-        '0' to '⁰', '1' to '¹', '2' to '²', '3' to '³', '4' to '⁴',
-        '5' to '⁵', '6' to '⁶', '7' to '⁷', '8' to '⁸', '9' to '⁹',
-        '+' to '⁺', '-' to '⁻', '=' to '⁼', '(' to '⁽', ')' to '⁾',
-        'n' to 'ⁿ', 'i' to 'ⁱ', 'x' to 'ˣ'
-    )
+    private fun replaceNestedFractions(input: String): String {
+        var s = input
+        while (s.contains("\\frac{")) {
+            val start = s.indexOf("\\frac{")
+            var depth = 1
+            var numEnd = -1
+            for (idx in (start + 6) until s.length) {
+                if (s[idx] == '{') depth++
+                else if (s[idx] == '}') {
+                    depth--
+                    if (depth == 0) {
+                        numEnd = idx
+                        break
+                    }
+                }
+            }
+            if (numEnd == -1 || numEnd + 1 >= s.length || s[numEnd + 1] != '{') break
+            val denStart = numEnd + 1
+            depth = 1
+            var denEnd = -1
+            for (idx in (denStart + 1) until s.length) {
+                if (s[idx] == '{') depth++
+                else if (s[idx] == '}') {
+                    depth--
+                    if (depth == 0) {
+                        denEnd = idx
+                        break
+                    }
+                }
+            }
+            if (denEnd == -1) break
+            val num = s.substring(start + 6, numEnd).trim()
+            val den = s.substring(denStart + 1, denEnd).trim()
+            s = s.substring(0, start) + "(${num}/${den})" + s.substring(denEnd + 1)
+        }
+        return s
+    }
 
-    private val subscriptMap = mapOf(
-        '0' to '₀', '1' to '₁', '2' to '₂', '3' to '₃', '4' to '₄',
-        '5' to '₅', '6' to '₆', '7' to '₇', '8' to '₈', '9' to '₉',
-        '+' to '₊', '-' to '₋', '=' to '₌', '(' to '₍', ')' to '₎',
-        'a' to 'ₐ', 'e' to 'ₑ', 'o' to 'ₒ', 'x' to 'ₓ', 'n' to 'ₙ'
-    )
+    private fun replaceNestedSqrt(input: String): String {
+        var s = input
+        while (s.contains("\\sqrt{")) {
+            val start = s.indexOf("\\sqrt{")
+            var depth = 1
+            var end = -1
+            for (idx in (start + 6) until s.length) {
+                if (s[idx] == '{') depth++
+                else if (s[idx] == '}') {
+                    depth--
+                    if (depth == 0) {
+                        end = idx
+                        break
+                    }
+                }
+            }
+            if (end == -1) break
+            val content = s.substring(start + 6, end).trim()
+            s = s.substring(0, start) + "√(${content})" + s.substring(end + 1)
+        }
+        return s
+    }
 
     fun format(rawText: String): AnnotatedString {
         if (rawText.isBlank()) return AnnotatedString("")
@@ -53,6 +102,8 @@ object MathTextFormatter {
         // 2. Decode standard LaTeX symbol replacements
         text = text
             .replace("\\rightarrow", "→")
+            .replace("\\to", "→")
+            .replace("\\leftarrow", "←")
             .replace("\\le", "≤")
             .replace("\\leq", "≤")
             .replace("\\ge", "≥")
@@ -63,6 +114,10 @@ object MathTextFormatter {
             .replace("\\div", "÷")
             .replace("\\pm", "±")
             .replace("\\mp", "∓")
+            .replace("\\cdot", "·")
+            .replace("\\degree", "°")
+            .replace("\\angle", "∠")
+            .replace("\\triangle", "△")
             .replace("\\infty", "∞")
             .replace("\\pi", "π")
             .replace("\\in", "∈")
@@ -88,6 +143,7 @@ object MathTextFormatter {
             .replace("\\mathbb{N}", "ℕ")
             .replace("\\mathbb{R}", "ℝ")
             .replace("\\mathbb{Z}", "ℤ")
+            .replace("\\mathbb{Q}", "ℚ")
             .replace("\\IN", "ℕ")
             .replace("\\left(", "(")
             .replace("\\right)", ")")
@@ -97,24 +153,20 @@ object MathTextFormatter {
             .replace("\\right.", "")
             .replace("\\{", "{")
             .replace("\\}", "}")
-            .replace("\\text", "")
-            .replace("\\mathrm", "")
 
-        // 3. Convert \sqrt{x} -> √(x)
-        val sqrtRegex = Regex("""\\sqrt\{([^{}]+)\}""")
-        text = sqrtRegex.replace(text) { match ->
-            "√(${match.groupValues[1].trim()})"
-        }
+        // Remove \text{...} and \mathrm{...} wrappers
+        text = Regex("""\\(?:text|mathrm)\{([^{}]+)\}""").replace(text) { it.groupValues[1] }
+        text = text.replace("\\text", "").replace("\\mathrm", "")
+
+        // 3. Convert \sqrt{x} -> √(x) and single-letter sqrt
+        text = replaceNestedSqrt(text)
         val sqrtSingle = Regex("""\\sqrt\s*([0-9a-zA-Z])""")
         text = sqrtSingle.replace(text) { match ->
             "√${match.groupValues[1]}"
         }
 
         // 4. Convert \frac{a}{b} -> (a/b)
-        val fracRegex = Regex("""\\frac\{([^{}]+)\}\{([^{}]+)\}""")
-        text = fracRegex.replace(text) { match ->
-            "${match.groupValues[1].trim()}/${match.groupValues[2].trim()}"
-        }
+        text = replaceNestedFractions(text)
 
         // 5. Convert \dot{x} -> ẋ
         val dotRegex = Regex("""\\dot\{([^{}]+)\}""")
@@ -125,7 +177,7 @@ object MathTextFormatter {
         // 6. Strip $ delimiters used in LaTeX
         text = text.replace("$", "")
 
-        // 7. Build rich annotated string with superscript and subscript spans
+        // 7. Build rich annotated string with clean single-shift superscript and subscript spans
         return buildAnnotatedString {
             var i = 0
             while (i < text.length) {
@@ -139,11 +191,11 @@ object MathTextFormatter {
                                 val content = text.substring(i + 1, end)
                                 pushStyle(
                                     SpanStyle(
-                                        baselineShift = BaselineShift.Superscript,
-                                        fontSize = TextUnit.Unspecified,
+                                        baselineShift = BaselineShift(0.35f),
+                                        fontSize = 0.75.em,
                                     )
                                 )
-                                append(toUnicodeSuperscript(content))
+                                append(content)
                                 pop()
                                 i = end + 1
                             } else {
@@ -151,14 +203,14 @@ object MathTextFormatter {
                             }
                         } else if (i < text.length) {
                             val c = text[i]
-                            val superChar = superscriptMap[c]
-                            if (superChar != null) {
-                                append(superChar)
-                            } else {
-                                pushStyle(SpanStyle(baselineShift = BaselineShift.Superscript))
-                                append(c)
-                                pop()
-                            }
+                            pushStyle(
+                                SpanStyle(
+                                    baselineShift = BaselineShift(0.35f),
+                                    fontSize = 0.75.em,
+                                )
+                            )
+                            append(c)
+                            pop()
                             i++
                         }
                     }
@@ -172,11 +224,11 @@ object MathTextFormatter {
                                 val content = text.substring(i + 1, end)
                                 pushStyle(
                                     SpanStyle(
-                                        baselineShift = BaselineShift.Subscript,
-                                        fontSize = TextUnit.Unspecified,
+                                        baselineShift = BaselineShift(-0.25f),
+                                        fontSize = 0.75.em,
                                     )
                                 )
-                                append(toUnicodeSubscript(content))
+                                append(content)
                                 pop()
                                 i = end + 1
                             } else {
@@ -184,14 +236,14 @@ object MathTextFormatter {
                             }
                         } else if (i < text.length) {
                             val c = text[i]
-                            val subChar = subscriptMap[c]
-                            if (subChar != null) {
-                                append(subChar)
-                            } else {
-                                pushStyle(SpanStyle(baselineShift = BaselineShift.Subscript))
-                                append(c)
-                                pop()
-                            }
+                            pushStyle(
+                                SpanStyle(
+                                    baselineShift = BaselineShift(-0.25f),
+                                    fontSize = 0.75.em,
+                                )
+                            )
+                            append(c)
+                            pop()
                             i++
                         }
                     }
@@ -203,22 +255,6 @@ object MathTextFormatter {
                 }
             }
         }
-    }
-
-    private fun toUnicodeSuperscript(s: String): String {
-        val sb = StringBuilder()
-        for (c in s) {
-            sb.append(superscriptMap[c] ?: c)
-        }
-        return sb.toString()
-    }
-
-    private fun toUnicodeSubscript(s: String): String {
-        val sb = StringBuilder()
-        for (c in s) {
-            sb.append(subscriptMap[c] ?: c)
-        }
-        return sb.toString()
     }
 }
 

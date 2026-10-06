@@ -43,6 +43,8 @@ import com.prostuti.feature.practice.presentation.PracticeViewModel
 import com.prostuti.feature.practice.ui.PracticeScreen
 import com.prostuti.feature.profile.presentation.ProfileViewModel
 import com.prostuti.feature.profile.ui.ProfileScreen
+import com.prostuti.feature.questionbank.presentation.QuestionBankUiEvent
+import com.prostuti.feature.questionbank.presentation.QuestionBankView
 import com.prostuti.feature.questionbank.presentation.QuestionBankViewModel
 import com.prostuti.feature.questionbank.ui.QuestionBankScreen
 import org.koin.androidx.compose.koinViewModel
@@ -137,7 +139,10 @@ fun MainScreen(
                     profileViewModel = profileViewModel,
                     onNavigateToPractice = { selectTab(1) },
                     onNavigateToQuestionBank = { selectTab(2) },
-                    onNavigateToExam = { onNavigateToExam(null) },
+                    onNavigateToModelTests = {
+                        questionBankViewModel.onEvent(QuestionBankUiEvent.NavigateView(QuestionBankView.MODEL_TESTS))
+                        selectTab(2)
+                    },
                     onNavigateToHistory = onNavigateToHistory,
                     onNavigateToProfile = { selectTab(3) },
                     onNavigateToAdmin = onNavigateToAdmin,

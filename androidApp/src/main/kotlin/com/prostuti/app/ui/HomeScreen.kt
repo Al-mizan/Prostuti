@@ -51,6 +51,7 @@ import com.prostuti.core.designsystem.MascotAvatar
 import com.prostuti.core.designsystem.MascotPresets
 import com.prostuti.core.designsystem.ProstutiBadge
 import com.prostuti.core.designsystem.ProstutiCard
+import com.prostuti.core.designsystem.ProstutiEmblem
 import com.prostuti.core.designsystem.ProstutiProgressBar
 import com.prostuti.core.model.Role
 import com.prostuti.feature.profile.presentation.ProfileUiState
@@ -71,7 +72,7 @@ fun HomeScreen(
     profileViewModel: ProfileViewModel,
     onNavigateToPractice: () -> Unit,
     onNavigateToQuestionBank: () -> Unit,
-    onNavigateToExam: () -> Unit,
+    onNavigateToModelTests: () -> Unit,
     onNavigateToHistory: () -> Unit,
     onNavigateToProfile: () -> Unit,
     onNavigateToAdmin: () -> Unit,
@@ -108,6 +109,34 @@ fun HomeScreen(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 16.dp),
     ) {
+        // Top App Bar: Logo (Left), "Prostuti" (Center), Avatar (Right)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            // Left: Logo Emblem
+            ProstutiEmblem(size = 40.dp)
+
+            // Center: App Name
+            Text(
+                text = "Prostuti",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                letterSpacing = 0.5.sp,
+            )
+
+            // Right: Beautiful Avatar
+            MascotAvatar(
+                avatarId = avatarId,
+                size = 40.dp,
+                onClick = onNavigateToProfile,
+            )
+        }
+
         // Hero Card with Mascot & Greeting
         Surface(
             shape = RoundedCornerShape(20.dp),
@@ -391,15 +420,15 @@ fun HomeScreen(
 
         Spacer(Modifier.height(10.dp))
 
-        // Timed Mock Exam Card
+        // Live Model Test Card (replaces Timed Mock Exam Card)
         DashboardActionCard(
-            title = "পূর্ণাঙ্গ টাইমড মক টেস্ট",
-            subtitle = "২০০ নম্বর ও ১২০ মিনিটের রিয়েল-টাইম পরীক্ষা",
-            badgeText = "মক টেস্ট",
+            title = "বিসিএস লাইভ মডেল টেস্ট",
+            subtitle = "১৫ দিনব্যাপী ২০০ নম্বরের পূর্ণাঙ্গ লাইভ পরীক্ষা ও মেধা তালিকা",
+            badgeText = "লাইভ চলছে",
             icon = Icons.Default.Timer,
-            iconColor = Color(0xFF2563EB),
-            iconBgColor = Color(0xFFDBEAFE),
-            onClick = onNavigateToExam,
+            iconColor = Color(0xFFDC143C),
+            iconBgColor = Color(0xFFFFE4E6),
+            onClick = onNavigateToModelTests,
         )
 
         Spacer(Modifier.height(10.dp))
